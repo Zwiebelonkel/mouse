@@ -2,7 +2,6 @@
   "name": "nextn",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Zwiebelonkel.github.io/mouse",
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
@@ -10,9 +9,7 @@
     "build": "next build",
     "start": "npx serve@latest docs",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d out"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
@@ -64,7 +61,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "genkit-cli": "^1.20.0",
-    "gh-pages": "^6.3.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

@@ -22,13 +22,13 @@ export default function Home() {
     const root = document.documentElement;
     root.classList.remove("dark", "theme-darker", "theme-darkest", "theme-uncanny");
 
-    if (milkedCount >= 5) {
+    if (milkedCount >= 10) {
       root.classList.add("theme-uncanny");
-    } else if (milkedCount >= 3) {
+    } else if (milkedCount >= 7) {
       root.classList.add("theme-darkest");
-    } else if (milkedCount >= 2) {
+    } else if (milkedCount >= 4) {
       root.classList.add("theme-darker");
-    } else if (milkedCount >= 1) {
+    } else if (milkedCount >= 2) {
       root.classList.add("dark");
     }
   }, [milkedCount]);

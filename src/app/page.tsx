@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,6 +18,11 @@ export default function Home() {
   const [clicksToMilk, setClicksToMilk] = useState(INITIAL_CLICKS_TO_MILK);
   const [milkedCount, setMilkedCount] = useState(0);
 
+  const clickSoundRef = useRef<HTMLAudioElement>(null);
+  const successSoundRef = useRef<HTMLAudioElement>(null);
+  const newMouseSoundRef = useRef<HTMLAudioElement>(null);
+
+
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("dark", "theme-darker", "theme-darkest", "theme-uncanny");
@@ -33,14 +38,22 @@ export default function Home() {
     }
   }, [milkedCount]);
 
+  useEffect(() => {
+    if (clicks === clicksToMilk && clicks > 0) {
+      successSoundRef.current?.play();
+    }
+  }, [clicks, clicksToMilk]);
+
 
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
+      clickSoundRef.current?.play();
       setClicks(clicks + 1);
     }
   };
 
   const handlePlayAgain = () => {
+    newMouseSoundRef.current?.play();
     setClicks(0);
     setMilkedCount(milkedCount + 1);
     setClicksToMilk(Math.ceil(clicksToMilk * 1.15));
@@ -50,6 +63,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
+      <audio ref={clickSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fclick.wav?alt=media&token=8f811536-09a2-4bf8-94a0-8c2f15a2896c" preload="auto" />
+      <audio ref={successSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fsuccess.wav?alt=media&token=6a03295c-7a91-4475-8718-2831d10214a3" preload="auto" />
+      <audio ref={newMouseSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fnew_mouse.wav?alt=media&token=d515433a-4a27-464a-a035-779435b54639" preload="auto" />
       <Card className="w-full max-w-sm text-center shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-4xl font-bold tracking-tight">

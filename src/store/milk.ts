@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface MilkState {
   milkedCount: number;
@@ -8,11 +9,19 @@ interface MilkState {
   decreaseMilkedCount: (amount: number) => void;
 }
 
-export const useMilkStore = create<MilkState>((set) => ({
-  milkedCount: 0,
-  increaseMilkedCount: () => set((state) => ({ milkedCount: state.milkedCount + 1 })),
-  clicksPerMilk: 1,
-  increaseClicksPerMilk: () => set((state) => ({ clicksPerMilk: state.clicksPerMilk + 1 })),
-  decreaseMilkedCount: (amount) =>
-    set((state) => ({ milkedCount: state.milkedCount - amount })),
-}));
+export const useMilkStore = create<MilkState>()(
+  persist(
+    (set) => ({
+      milkedCount: 0,
+      increaseMilkedCount: () => set((state) => ({ milkedCount: state.milkedCount + 1 })),
+      clicksPerMilk: 1,
+      increaseClicksPerMilk: () => set((state) => ({ clicksPerMilk: state.clicksPerMilk + 1 })),
+      decreaseMilkedCount: (amount) =>
+        set((state) => ({ milkedCount: state.milkedCount - amount })),
+    }),
+    {
+      name: 'milk-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

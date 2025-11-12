@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Mouse } from "lucide-react";
+import { Rat } from "lucide-react";
 
 const CLICKS_TO_MILK = 10;
 
@@ -58,7 +58,7 @@ export default function Home() {
                 className="group rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
                 aria-label="Milk the mouse"
               >
-                <Mouse className="h-40 w-40 text-primary drop-shadow-lg transition-transform duration-200 group-hover:scale-105" />
+                <Rat className="h-40 w-40 text-primary drop-shadow-lg transition-transform duration-200 group-hover:scale-105" />
               </button>
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">{clicks}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +17,22 @@ export default function Home() {
   const [clicks, setClicks] = useState(0);
   const [clicksToMilk, setClicksToMilk] = useState(INITIAL_CLICKS_TO_MILK);
   const [milkedCount, setMilkedCount] = useState(0);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("dark", "theme-darker", "theme-darkest", "theme-uncanny");
+
+    if (milkedCount >= 5) {
+      root.classList.add("theme-uncanny");
+    } else if (milkedCount >= 3) {
+      root.classList.add("theme-darkest");
+    } else if (milkedCount >= 2) {
+      root.classList.add("theme-darker");
+    } else if (milkedCount >= 1) {
+      root.classList.add("dark");
+    }
+  }, [milkedCount]);
+
 
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {

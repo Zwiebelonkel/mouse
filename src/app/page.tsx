@@ -59,7 +59,7 @@ export default function Home() {
     }
   };
 
-  const handlePlayAgain = () => {
+  const handlePlayAgain = ()_of_the_mouse => {
     newMouseSoundRef.current?.play();
     setClicks(0);
     increaseMilkedCount();
@@ -115,8 +115,7 @@ export default function Home() {
             <div className="flex flex-col items-center gap-4">
               <button
                 onClick={handleMouseClick}
-                onMouseDown={handleMouseClick}
-                className="rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90 cursor-pointer"
+                className="rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
                 aria-label="Milk the mouse"
               >
                 <Rat

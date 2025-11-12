@@ -70,8 +70,8 @@ export default function Home() {
       {isMounted && (
         <>
           <audio ref={clickSoundRef} src="/sounds/click.mp3" preload="auto" />
-          <audio ref={successSoundRef} src="/sounds/MouseMilked.mp3" preload="auto" />
-          <audio ref={newMouseSoundRef} src="/sounds/NewMouse.mp3" preload="auto" />
+          <audio ref={successSoundRef} src="/sounds/sucess.mp3" preload="auto" />
+          <audio ref={newMouseSoundRef} src="/sounds/plase.mp3" preload="auto" />
         </>
       )}
       <Card className="w-full max-w-sm text-center shadow-2xl">

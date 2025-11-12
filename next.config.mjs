@@ -3,7 +3,6 @@ const nextConfig = {
   output: 'export',
   distDir: 'docs',
   basePath: '/mouse',
-  assetPrefix: "https://Zwiebelonkel.github.io/mouse/",
   trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,

@@ -69,9 +69,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
       {isMounted && (
         <>
-          <audio ref={clickSoundRef} src="/sounds/click.wav" preload="auto" />
-          <audio ref={successSoundRef} src="/sounds/success.wav" preload="auto" />
-          <audio ref={newMouseSoundRef} src="/sounds/new_mouse.wav" preload="auto" />
+          <audio ref={clickSoundRef} src="/sounds/click.mp3" preload="auto" />
+          <audio ref={successSoundRef} src="/sounds/MouseMilked.mp3" preload="auto" />
+          <audio ref={newMouseSoundRef} src="/sounds/NewMouse.mp3" preload="auto" />
         </>
       )}
       <Card className="w-full max-w-sm text-center shadow-2xl">

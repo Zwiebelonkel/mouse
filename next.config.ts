@@ -1,10 +1,12 @@
 import type {NextConfig} from 'next';
-
+      
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'export',
-  distDir: 'out',
-  basePath: '/mouse',
+  devIndicators: {
+    allowedDevOrigins: [
+      '9003-firebase-studio-1762941953877.cluster-gjstlrnqpna56vr4xhdezmmq4e.cloudworkstations.dev',
+    ],
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -17,23 +19,9 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
       },
     ],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

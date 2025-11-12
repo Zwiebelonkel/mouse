@@ -12,12 +12,20 @@ import { useMilkStore } from '@/store/milk';
 import Link from 'next/link';
 
 export default function Shop() {
-  const { milkedCount, clicksPerMilk, increaseClicksPerMilk, decreaseMilkedCount } = useMilkStore();
+  const {
+    milkedCount,
+    clicksPerMilk,
+    increaseClicksPerMilk,
+    decreaseMilkedCount,
+    extraFingerCost,
+    increaseExtraFingerCost,
+  } = useMilkStore();
 
   const handleUpgrade = () => {
-    if (milkedCount >= 10) {
-      decreaseMilkedCount(10);
+    if (milkedCount >= extraFingerCost) {
+      decreaseMilkedCount(extraFingerCost);
       increaseClicksPerMilk();
+      increaseExtraFingerCost();
     }
   };
 
@@ -34,10 +42,10 @@ export default function Shop() {
           <div className="flex flex-col gap-4">
             <Button
               onClick={handleUpgrade}
-              disabled={milkedCount < 10}
+              disabled={milkedCount < extraFingerCost}
               size="lg"
             >
-              Extra Finger (Cost: 10 Milk)
+              Extra Finger (Cost: {extraFingerCost} Milk)
             </Button>
             <p className="text-sm text-muted-foreground">
               Current milking power: {clicksPerMilk}

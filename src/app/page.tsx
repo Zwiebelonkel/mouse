@@ -13,18 +13,28 @@ import { Rat } from 'lucide-react';
 import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 
-const INITIAL_CLICKS_TO_MILK = 10;
+const startSounds = ['/sounds/start1.mp3', '/sounds/start2.mp3'];
+const successSounds = ['/sounds/sucess.mp3', '/sounds/sucess2.mp3', '/sounds/sucess3.mp3'];
+const warningSounds = ['/sounds/warning.mp3', '/sounds/warning1.mp3', '/sounds/warning2.mp3', '/sounds/warning3.mp3', '/sounds/warning4.mp3'];
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);
-  const [clicksToMilk, setClicksToMilk] = useState(INITIAL_CLICKS_TO_MILK);
-  const { milkedCount, increaseMilkedCount, clicksPerMilk } = useMilkStore();
+  const {
+    milkedCount,
+    totalMilkedCount,
+    increaseMilkedCount,
+    clicksPerMilk,
+    clicksToMilk,
+    increaseClicksToMilk,
+  } = useMilkStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const clickSoundRef = useRef<HTMLAudioElement>(null);
-  const successSoundRef = useRef<HTMLAudioElement>(null);
-  const newMouseSoundRef = useRef<HTMLAudioElement>(null);
+  const playRandomSound = (sounds: string[]) => {
+    const sound = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
+    sound.play();
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -34,49 +44,63 @@ export default function Home() {
     const root = document.documentElement;
     root.classList.remove('dark', 'theme-darker', 'theme-darkest', 'theme-uncanny');
 
-    if (milkedCount >= 10) {
+    if (totalMilkedCount >= 10) {
       root.classList.add('theme-uncanny');
-    } else if (milkedCount >= 7) {
+    } else if (totalMilkedCount >= 7) {
       root.classList.add('theme-darkest');
-    } else if (milkedCount >= 4) {
+    } else if (totalMilkedCount >= 4) {
       root.classList.add('theme-darker');
-    } else if (milkedCount >= 2) {
+    } else if (totalMilkedCount >= 2) {
       root.classList.add('dark');
     }
-  }, [milkedCount]);
+  }, [totalMilkedCount]);
 
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0) {
-      successSoundRef.current?.play();
+      playRandomSound(successSounds);
     }
   }, [clicks, clicksToMilk]);
 
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
-      clickSoundRef.current?.play();
+      const clickSound = new Audio('/sounds/click.mp3');
+      clickSound.play();
       setClicks(clicks + clicksPerMilk);
       setIsFlipped(!isFlipped);
+      resetWarningTimeout();
     }
   };
 
   const handlePlayAgain = () => {
-    newMouseSoundRef.current?.play();
+    playRandomSound(startSounds);
     setClicks(0);
     increaseMilkedCount();
-    setClicksToMilk(Math.ceil(clicksToMilk * 1.15));
+    increaseClicksToMilk();
+    resetWarningTimeout();
   };
+
+  const resetWarningTimeout = () => {
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+    warningTimeoutRef.current = setTimeout(() => {
+      playRandomSound(warningSounds);
+    }, 10000);
+  };
+
+  useEffect(() => {
+    resetWarningTimeout();
+    return () => {
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const milked = clicks >= clicksToMilk;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
-      {isMounted && (
-        <>
-          <audio ref={clickSoundRef} src="/mouse/sounds/click.mp3" preload="auto" />
-          <audio ref={successSoundRef} src="/mouse/sounds/sucess.mp3" preload="auto" />
-          <audio ref={newMouseSoundRef} src="/mouse/sounds/plase.mp3" preload="auto" />
-        </>
-      )}
       <div className="fixed top-4 right-4 z-[99999]">
         <Link href="/shop">
           <Button>Shop</Button>
@@ -96,7 +120,7 @@ export default function Home() {
           <CardDescription>
             {milked
               ? 'You did it!'
-              : `Bitte melken Sie die Maus (Mäuse gemolken: ${milkedCount})`}
+              : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex h-80 flex-col items-center justify-center p-6">

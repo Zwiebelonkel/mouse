@@ -11,22 +11,26 @@ import {
 } from "@/components/ui/card";
 import { Rat } from "lucide-react";
 
-const CLICKS_TO_MILK = 10;
+const INITIAL_CLICKS_TO_MILK = 10;
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);
+  const [clicksToMilk, setClicksToMilk] = useState(INITIAL_CLICKS_TO_MILK);
+  const [milkedCount, setMilkedCount] = useState(0);
 
   const handleMouseClick = () => {
-    if (clicks < CLICKS_TO_MILK) {
+    if (clicks < clicksToMilk) {
       setClicks(clicks + 1);
     }
   };
 
   const handlePlayAgain = () => {
     setClicks(0);
+    setMilkedCount(milkedCount + 1);
+    setClicksToMilk(Math.ceil(clicksToMilk * 1.15));
   };
 
-  const milked = clicks >= CLICKS_TO_MILK;
+  const milked = clicks >= clicksToMilk;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
@@ -36,7 +40,9 @@ export default function Home() {
             Mouse Milker
           </CardTitle>
           <CardDescription>
-            {milked ? "You did it!" : "A thrilling clicking adventure"}
+            {milked
+              ? "You did it!"
+              : `A thrilling clicking adventure (Mice Milked: ${milkedCount})`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex h-80 flex-col items-center justify-center p-6">
@@ -64,8 +70,8 @@ export default function Home() {
                 <p className="text-5xl font-bold text-foreground">{clicks}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {clicks === 0
-                    ? "Please milk the mouse"
-                    : `${CLICKS_TO_MILK - clicks} more clicks to go!`}
+                    ? `Click the mouse ${clicksToMilk} times!`
+                    : `${clicksToMilk - clicks} more clicks to go!`}
                 </p>
               </div>
             </div>

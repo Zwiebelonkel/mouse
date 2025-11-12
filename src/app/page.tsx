@@ -13,9 +13,9 @@ import { Rat } from 'lucide-react';
 import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 
-const startSounds = ['/sounds/start1.mp3', '/sounds/start2.mp3'];
-const successSounds = ['/sounds/sucess.mp3', '/sounds/sucess2.mp3', '/sounds/sucess3.mp3'];
-const warningSounds = ['/sounds/warning.mp3', '/sounds/warning1.mp3', '/sounds/warning2.mp3', '/sounds/warning3.mp3', '/sounds/warning4.mp3'];
+const startSounds = ['/mouse/sounds/start1.mp3', '/mouse/sounds/start2.mp3'];
+const successSounds = ['/mouse/sounds/sucess.mp3', '/mouse/sounds/sucess2.mp3', '/mouse/sounds/sucess3.mp3'];
+const warningSounds = ['/mouse/sounds/warning.mp3', '/mouse/sounds/warning1.mp3', '/mouse/sounds/warning2.mp3', '/mouse/sounds/warning3.mp3', '/mouse/sounds/warning4.mp3'];
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);
@@ -63,7 +63,7 @@ export default function Home() {
 
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
-      const clickSound = new Audio('/sounds/click.mp3');
+      const clickSound = new Audio('/mouse/sounds/click.mp3');
       clickSound.play();
       setClicks(clicks + clicksPerMilk);
       setIsFlipped(!isFlipped);

@@ -59,7 +59,7 @@ export default function Home() {
     }
   };
 
-  const handlePlayAgain = () => {
+  const handlePlayAgain = ()_of_the_mouse => {
     newMouseSoundRef.current?.play();
     setClicks(0);
     increaseMilkedCount();
@@ -72,9 +72,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
       {isMounted && (
         <>
-          <audio ref={clickSoundRef} src="/sounds/click.mp3" preload="auto" />
-          <audio ref={successSoundRef} src="/sounds/sucess.mp3" preload="auto" />
-          <audio ref={newMouseSoundRef} src="/sounds/plase.mp3" preload="auto" />
+          <audio ref={clickSoundRef} src="/mouse/sounds/click.mp3" preload="auto" />
+          <audio ref={successSoundRef} src="/mouse/sounds/sucess.mp3" preload="auto" />
+          <audio ref={newMouseSoundRef} src="/mouse/sounds/plase.mp3" preload="auto" />
         </>
       )}
       <div className="fixed top-4 right-4 z-[99999]">

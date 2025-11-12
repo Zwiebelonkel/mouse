@@ -17,11 +17,15 @@ export default function Home() {
   const [clicks, setClicks] = useState(0);
   const [clicksToMilk, setClicksToMilk] = useState(INITIAL_CLICKS_TO_MILK);
   const [milkedCount, setMilkedCount] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
 
   const clickSoundRef = useRef<HTMLAudioElement>(null);
   const successSoundRef = useRef<HTMLAudioElement>(null);
   const newMouseSoundRef = useRef<HTMLAudioElement>(null);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -63,9 +67,13 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
-      <audio ref={clickSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fclick.wav?alt=media&token=8f811536-09a2-4bf8-94a0-8c2f15a2896c" preload="auto" />
-      <audio ref={successSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fsuccess.wav?alt=media&token=6a03295c-7a91-4475-8718-2831d10214a3" preload="auto" />
-      <audio ref={newMouseSoundRef} src="https://firebasestorage.googleapis.com/v0/b/genkit-llm-demo.appspot.com/o/mouse-milker%2Fnew_mouse.wav?alt=media&token=d515433a-4a27-464a-a035-779435b54639" preload="auto" />
+      {isMounted && (
+        <>
+          <audio ref={clickSoundRef} src="/sounds/click.wav" preload="auto" />
+          <audio ref={successSoundRef} src="/sounds/success.wav" preload="auto" />
+          <audio ref={newMouseSoundRef} src="/sounds/new_mouse.wav" preload="auto" />
+        </>
+      )}
       <Card className="w-full max-w-sm text-center shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-4xl font-bold tracking-tight">
@@ -74,7 +82,7 @@ export default function Home() {
           <CardDescription>
             {milked
               ? "You did it!"
-              : `A thrilling clicking adventure (Mice Milked: ${milkedCount})`}
+              : `Bitte melken Sie die Maus (Mäuse gemolken: ${milkedCount})`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex h-80 flex-col items-center justify-center p-6">

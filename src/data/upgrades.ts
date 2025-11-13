@@ -75,7 +75,7 @@ export const upgrades = {
   hamsterWheel: {
     name: "Hamsterrad",
     description: "+5 Milch/min",
-    baseCost: 300,
+    baseCost: 20,
     maxLevel: 10,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 5,
@@ -85,7 +85,7 @@ export const upgrades = {
   milkFarm: {
     name: "Milchfarm",
     description: "+50 Milch/min",
-    baseCost: 1500,
+    baseCost: 150,
     maxLevel: 5,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 50,

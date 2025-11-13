@@ -19,6 +19,7 @@ const startSounds = [
   '/mouse/sounds/start2.mp3',
   '/mouse/sounds/start3.mp3',
   '/mouse/sounds/start4.mp3',
+  '/mouse/sounds/start5.mp3',
 ];
 
 const successSounds = [
@@ -249,6 +250,20 @@ export default function Home() {
       : multiplier >= 1.5
       ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]'
       : '';
+
+      useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (event.code === 'Space') {
+            handleMouseClick();
+          }
+        };
+    
+        window.addEventListener('keydown', handleKeyDown);
+    
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+        };
+      }, [handleMouseClick]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">

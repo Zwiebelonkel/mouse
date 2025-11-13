@@ -160,7 +160,7 @@ export default function Home() {
             </div>
           )}
         </CardContent>
-      </card>
+      </Card>
     </main>
   );
 }

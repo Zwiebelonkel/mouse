@@ -14,6 +14,36 @@ import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 
+// ===========================
+//      SOUND ENGINE
+// ===========================
+
+function useSoundPool(paths: string[], getPlaybackRate?: () => number) {
+  const poolRef = useRef<HTMLAudioElement[]>([]);
+
+  useEffect(() => {
+    poolRef.current = paths.map((p) => {
+      const audio = new Audio(p);
+      audio.load();
+      return audio;
+    });
+  }, [paths]);
+
+  const play = () => {
+    if (poolRef.current.length === 0) return;
+
+    const original = poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
+    const clone = original.cloneNode(true) as HTMLAudioElement;
+
+    if (getPlaybackRate) clone.playbackRate = getPlaybackRate();
+
+    clone.play();
+  };
+
+  return play;
+}
+
+// Soundlisten
 const startSounds = [
   '/mouse/sounds/start1.mp3',
   '/mouse/sounds/start2.mp3',
@@ -44,8 +74,26 @@ const warningSounds = [
 ];
 
 export default function Home() {
-  const [clicks, setClicks] = useState(0);
 
+  // ==== Sound Pitch Berechnung ====
+  const getDeepPitch = () => {
+    const { totalMilkedCount } = useMilkStore.getState();
+    return Math.max(0.7, 1 - totalMilkedCount * 0.005);
+  };
+
+  // ==== Sound Pools ====
+  const playStartSound = useSoundPool(startSounds, getDeepPitch);
+  const playSuccessSound = useSoundPool(successSounds, getDeepPitch);
+  const playWarningSound = useSoundPool(warningSounds, getDeepPitch);
+
+  // Clicksound bleibt normal
+  const playClickSound = useSoundPool(['/mouse/sounds/click.mp3']);
+
+  // ===========================
+  //        STATES
+  // ===========================
+
+  const [clicks, setClicks] = useState(0);
   const {
     milkedCount,
     totalMilkedCount,
@@ -60,14 +108,19 @@ export default function Home() {
   const [hasMilkedThisRound, setHasMilkedThisRound] = useState(false);
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentlyPlayingSound = useRef<HTMLAudioElement | null>(null);
 
-  // ========= MULTIPLIKATOR =========
+  // Screenshake
+  const [isShaking, setIsShaking] = useState(false);
+  const triggerShake = () => {
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 150);
+  };
+
+  // Combo-System
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
-
-  const comboTimeWindow = 400; // ms Zwischenraum
+  const comboTimeWindow = 400;
 
   const increaseMultiplier = () => {
     setMultiplier((prev) => {
@@ -85,7 +138,6 @@ export default function Home() {
     setComboProgress(0);
   };
 
-  // Combo-Bar countdown
   useEffect(() => {
     if (multiplier === 1) return;
 
@@ -103,7 +155,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  // Mini-Milk Partikel
+  // MINI MILK PARTICLES
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -117,7 +169,7 @@ export default function Home() {
     });
   };
 
-  // Großes Milch-Konfetti
+  // GROSSES MILK KONFETTI
   const fireMilkConfetti = () => {
     confetti({
       particleCount: 50,
@@ -141,38 +193,22 @@ export default function Home() {
     });
   };
 
-  // Sound Player
-  const playRandomSound = (sounds: string[]) => {
-    if (currentlyPlayingSound.current) {
-      currentlyPlayingSound.current.pause();
-      currentlyPlayingSound.current.currentTime = 0;
-    }
-    const sound = new Audio(
-      sounds[Math.floor(Math.random() * sounds.length)],
-    );
-    sound.play();
-    currentlyPlayingSound.current = sound;
-  };
+  // ============================
+  //        LOGIK
+  // ============================
 
   useEffect(() => {
     setIsMounted(true);
-
-    return () => {
-      if (currentlyPlayingSound.current) {
-        currentlyPlayingSound.current.pause();
-        currentlyPlayingSound.current.currentTime = 0;
-      }
-    };
   }, []);
 
-  // Erfolgssound abspielen
+  // Erfolgssound
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0) {
-      playRandomSound(successSounds);
+      playSuccessSound();
     }
   }, [clicks, clicksToMilk]);
 
-  // Erfolg → Milch + Konfetti
+  // Erfolg → Milch erhöhen, Shake, Konfetti
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
@@ -181,26 +217,26 @@ export default function Home() {
       fireMilkConfetti();
       triggerShake();
     }
-  }, [
-    clicks,
-    clicksToMilk,
-    hasMilkedThisRound,
-    increaseMilkedCount,
-  ]);
+  }, [clicks, clicksToMilk, hasMilkedThisRound, increaseMilkedCount]);
 
-  const [isShaking, setIsShaking] = useState(false);
-
-  const triggerShake = () => {
-    setIsShaking(true);
-    setTimeout(() => setIsShaking(false), 150);
+  const resetWarningTimeout = () => {
+    if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+    warningTimeoutRef.current = setTimeout(() => {
+      playWarningSound();
+    }, 10000);
   };
+
+  useEffect(() => {
+    resetWarningTimeout();
+    return () => {
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+    };
+  }, []);
 
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
-      const clickSound = new Audio('/mouse/sounds/click.mp3');
-      clickSound.play();
+      playClickSound();
 
-      // Multiplikator
       if (comboTimeout) clearTimeout(comboTimeout);
 
       increaseMultiplier();
@@ -218,7 +254,7 @@ export default function Home() {
   };
 
   const handlePlayAgain = () => {
-    playRandomSound(startSounds);
+    playStartSound();
     setClicks(0);
     increaseClicksToMilk();
     setHasMilkedThisRound(false);
@@ -226,20 +262,14 @@ export default function Home() {
     resetWarningTimeout();
   };
 
-  const resetWarningTimeout = () => {
-    if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
-    warningTimeoutRef.current = setTimeout(() => {
-      playRandomSound(warningSounds);
-    }, 10000);
-  };
-
+  // SPACEBAR-SUPPORT
   useEffect(() => {
-    resetWarningTimeout();
-
-    return () => {
-      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.code === "Space") handleMouseClick();
     };
-  }, []);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  });
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
@@ -250,20 +280,6 @@ export default function Home() {
       : multiplier >= 1.5
       ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]'
       : '';
-
-      useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-          if (event.code === 'Space') {
-            handleMouseClick();
-          }
-        };
-    
-        window.addEventListener('keydown', handleKeyDown);
-    
-        return () => {
-          window.removeEventListener('keydown', handleKeyDown);
-        };
-      }, [handleMouseClick]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
@@ -277,8 +293,8 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* MILCH CONTAINER */}
-      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
+      {/* MILK CONTAINER */}
+      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${progress * 100}%` }}
@@ -291,7 +307,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* GAME AREA – nur dieser Bereich shake't */}
+      {/* GAME AREA */}
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
         <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
           <CardHeader>
@@ -319,6 +335,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
+
                 <button
                   onMouseDown={handleMouseClick}
                   className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"

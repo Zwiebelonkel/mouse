@@ -1,49 +1,98 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { upgrades } from "@/data/upgrades";
+
+// Kostenformel
+const costFormula = (base: number, level: number) =>
+  Math.floor(base * Math.pow(1.65, level));
 
 const INITIAL_CLICKS_TO_MILK = 10;
 
-interface MilkState {
+export interface MilkState {
   milkedCount: number;
   totalMilkedCount: number;
-  increaseMilkedCount: () => void;
+
   clicksPerMilk: number;
-  increaseClicksPerMilk: () => void;
-  decreaseMilkedCount: (amount: number) => void;
+
+  comboDecayReduction: number;
+  maxMultiplierBonus: number;
+  baseMultiplierBonus: number;
+
+  passiveMilk: number;
+  lastPassiveTick: number;
+
   clicksToMilk: number;
+
+  upgradeLevels: Record<string, number>;
+
+  increaseMilkedCount: () => void;
+  decreaseMilkedCount: (amount: number) => void;
+
   increaseClicksToMilk: () => void;
-  extraFingerCost: number;
-  increaseExtraFingerCost: () => void;
+
+  buyUpgrade: (id: string) => boolean;
 }
 
 export const useMilkStore = create<MilkState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       milkedCount: 0,
       totalMilkedCount: 0,
+
+      clicksPerMilk: 1,
+
+      comboDecayReduction: 0,
+      maxMultiplierBonus: 0,
+      baseMultiplierBonus: 0,
+
+      passiveMilk: 0,
+      lastPassiveTick: Date.now(),
+
+      clicksToMilk: INITIAL_CLICKS_TO_MILK,
+
+      upgradeLevels: Object.fromEntries(
+        Object.keys(upgrades).map((k) => [k, 0])
+      ),
+
       increaseMilkedCount: () =>
         set((state) => ({
           milkedCount: state.milkedCount + 1,
           totalMilkedCount: state.totalMilkedCount + 1,
         })),
-      clicksPerMilk: 1,
-      increaseClicksPerMilk: () =>
-        set((state) => ({ clicksPerMilk: state.clicksPerMilk + 1 })),
+
       decreaseMilkedCount: (amount) =>
-        set((state) => ({ milkedCount: state.milkedCount - amount })),
-      clicksToMilk: INITIAL_CLICKS_TO_MILK,
+        set((state) => ({
+          milkedCount: Math.max(0, state.milkedCount - amount),
+        })),
+
       increaseClicksToMilk: () =>
         set((state) => ({
           clicksToMilk: Math.ceil(state.clicksToMilk * 1.15),
         })),
-      extraFingerCost: 10,
-      increaseExtraFingerCost: () =>
-        set((state) => ({
-          extraFingerCost: Math.ceil(state.extraFingerCost * 1.5),
-        })),
+
+      buyUpgrade: (id) => {
+        const state = get();
+        const upg = upgrades[id];
+        const level = state.upgradeLevels[id];
+        const cost = costFormula(upg.baseCost, level);
+
+        if (state.milkedCount < cost) return false;
+        if (level >= upg.maxLevel) return false;
+
+        set((s) => ({
+          milkedCount: s.milkedCount - cost,
+          ...upg.effect(s),
+          upgradeLevels: {
+            ...s.upgradeLevels,
+            [id]: level + 1,
+          },
+        }));
+
+        return true;
+      },
     }),
     {
-      name: 'milk-storage',
+      name: "milk-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

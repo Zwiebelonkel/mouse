@@ -14,36 +14,66 @@ import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 
-// ===========================
-//      SOUND ENGINE
-// ===========================
+// ===================================
+//        iPHONE AUDIO UNLOCK
+// ===================================
+function unlockIOSAudio() {
+  const empty = new Audio();
+  empty.play().catch(() => {});
+}
 
+// ===================================
+//           SOUND ENGINE
+// ===================================
 function useSoundPool(paths: string[], getPlaybackRate?: () => number) {
   const poolRef = useRef<HTMLAudioElement[]>([]);
+  const loadedRef = useRef(false);
 
-  useEffect(() => {
+  const loadAudio = () => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+
     poolRef.current = paths.map((p) => {
       const audio = new Audio(p);
       audio.load();
       return audio;
     });
-  }, [paths]);
+  };
+
+  // Lade die Sounds erst NACH dem ersten Tap
+  useEffect(() => {
+    const enable = () => {
+      loadAudio();
+      window.removeEventListener("touchstart", enable);
+      window.removeEventListener("mousedown", enable);
+    };
+
+    window.addEventListener("touchstart", enable, { once: true });
+    window.addEventListener("mousedown", enable, { once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", enable);
+      window.removeEventListener("mousedown", enable);
+    };
+  }, []);
 
   const play = () => {
-    if (poolRef.current.length === 0) return;
+    if (!loadedRef.current || poolRef.current.length === 0) return;
 
-    const original = poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
+    const original =
+      poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
+
     const clone = original.cloneNode(true) as HTMLAudioElement;
-
     if (getPlaybackRate) clone.playbackRate = getPlaybackRate();
-
     clone.play();
   };
 
   return play;
 }
 
-// Soundlisten
+// =====================
+//      SOUND LISTS
+// =====================
 const startSounds = [
   '/mouse/sounds/start1.mp3',
   '/mouse/sounds/start2.mp3',
@@ -75,24 +105,22 @@ const warningSounds = [
 
 export default function Home() {
 
-  // ==== Sound Pitch Berechnung ====
+  // 💿 Tiefere Sounds pro gemolkener Maus
   const getDeepPitch = () => {
     const { totalMilkedCount } = useMilkStore.getState();
     return Math.max(0.7, 1 - totalMilkedCount * 0.005);
   };
 
-  // ==== Sound Pools ====
+  // 🔊 Soundpools
   const playStartSound = useSoundPool(startSounds, getDeepPitch);
   const playSuccessSound = useSoundPool(successSounds, getDeepPitch);
   const playWarningSound = useSoundPool(warningSounds, getDeepPitch);
 
-  // Clicksound bleibt normal
   const playClickSound = useSoundPool(['/mouse/sounds/click.mp3']);
 
-  // ===========================
-  //        STATES
-  // ===========================
-
+  // ===================================
+  //         STATES
+  // ===================================
   const [clicks, setClicks] = useState(0);
   const {
     milkedCount,
@@ -109,17 +137,23 @@ export default function Home() {
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Screenshake
+  // ===================================
+  //        SCREEN SHAKE
+  // ===================================
   const [isShaking, setIsShaking] = useState(false);
+
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 150);
   };
 
-  // Combo-System
+  // ===================================
+  //         COMBO SYSTEM
+  // ===================================
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
+
   const comboTimeWindow = 400;
 
   const increaseMultiplier = () => {
@@ -140,7 +174,6 @@ export default function Home() {
 
   useEffect(() => {
     if (multiplier === 1) return;
-
     const interval = setInterval(() => {
       setComboProgress((prev) => {
         const next = prev - 0.02;
@@ -151,11 +184,12 @@ export default function Home() {
         return next;
       });
     }, comboTimeWindow / 50);
-
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  // MINI MILK PARTICLES
+  // ===================================
+  //         PARTICLE EFFECTS
+  // ===================================
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -169,7 +203,6 @@ export default function Home() {
     });
   };
 
-  // GROSSES MILK KONFETTI
   const fireMilkConfetti = () => {
     confetti({
       particleCount: 50,
@@ -181,34 +214,34 @@ export default function Home() {
       shapes: ['circle'],
       origin: { y: 0.6 },
     });
-
-    confetti({
-      particleCount: 25,
-      spread: 100,
-      startVelocity: 20,
-      gravity: 0.9,
-      colors: ['#ffffff'],
-      shapes: ['circle'],
-      origin: { y: 0.6 },
-    });
   };
 
-  // ============================
-  //        LOGIK
-  // ============================
-
+  // ===================================
+  //            EFFECTS
+  // ===================================
   useEffect(() => {
     setIsMounted(true);
+
+    // iPhone Audio Unlock
+    const unlock = () => {
+      unlockIOSAudio();
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("mousedown", unlock);
+    };
+
+    window.addEventListener("touchstart", unlock, { once: true });
+    window.addEventListener("mousedown", unlock, { once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("mousedown", unlock);
+    };
   }, []);
 
-  // Erfolgssound
   useEffect(() => {
-    if (clicks >= clicksToMilk && clicks > 0) {
-      playSuccessSound();
-    }
+    if (clicks >= clicksToMilk && clicks > 0) playSuccessSound();
   }, [clicks, clicksToMilk]);
 
-  // Erfolg → Milch erhöhen, Shake, Konfetti
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
@@ -221,9 +254,7 @@ export default function Home() {
 
   const resetWarningTimeout = () => {
     if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
-    warningTimeoutRef.current = setTimeout(() => {
-      playWarningSound();
-    }, 10000);
+    warningTimeoutRef.current = setTimeout(() => playWarningSound(), 10000);
   };
 
   useEffect(() => {
@@ -233,16 +264,18 @@ export default function Home() {
     };
   }, []);
 
+  // ===================================
+  //           MAIN CLICK LOGIC
+  // ===================================
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
       playClickSound();
 
       if (comboTimeout) clearTimeout(comboTimeout);
-
       increaseMultiplier();
 
-      const newTimeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
-      setComboTimeout(newTimeout);
+      const to = setTimeout(() => resetMultiplier(), comboTimeWindow);
+      setComboTimeout(to);
 
       fireMiniMilkParticles();
 
@@ -256,19 +289,19 @@ export default function Home() {
   const handlePlayAgain = () => {
     playStartSound();
     setClicks(0);
-    increaseClicksToMilk();
     setHasMilkedThisRound(false);
+    increaseClicksToMilk();
     resetMultiplier();
     resetWarningTimeout();
   };
 
-  // SPACEBAR-SUPPORT
+  // Spacebar Support
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.code === "Space") handleMouseClick();
+    const handler = (e: KeyboardEvent) => {
+      if (e.code === 'Space') handleMouseClick();
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   });
 
   const milked = clicks >= clicksToMilk;
@@ -281,6 +314,9 @@ export default function Home() {
       ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]'
       : '';
 
+  // ===================================
+  //             RENDER
+  // ===================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
 
@@ -294,7 +330,7 @@ export default function Home() {
       </div>
 
       {/* MILK CONTAINER */}
-      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
+      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${progress * 100}%` }}
@@ -323,7 +359,7 @@ export default function Home() {
 
           <CardContent className="flex flex-col items-center justify-center p-6">
             {milked ? (
-              <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in">
+              <div className="flex flex-col items-center gap-6">
                 <div className="rounded-xl bg-accent p-6 shadow-inner">
                   <p className="flex items-center gap-2 text-2xl font-bold text-accent-foreground">
                     <Milk className="h-6 w-6" /> Du hast die Maus gemolken!
@@ -339,7 +375,6 @@ export default function Home() {
                 <button
                   onMouseDown={handleMouseClick}
                   className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
-                  aria-label="Milk the mouse"
                 >
                   <Rat
                     className={`h-40 w-40 transition-transform duration-200 ${
@@ -367,11 +402,7 @@ export default function Home() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {clicks === 0
                       ? `Click the mouse ${clicksToMilk} times!`
-                      : `${
-                          clicksToMilk - clicks > 0
-                            ? Math.round(clicksToMilk - clicks)
-                            : 0
-                        } more clicks to go!`}
+                      : `${clicksToMilk - clicks > 0 ? Math.round(clicksToMilk - clicks) : 0} more clicks to go!`}
                   </p>
                 </div>
               </div>

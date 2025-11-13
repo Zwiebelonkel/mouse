@@ -54,7 +54,6 @@ function useSoundPool(
   const poolRef = useRef<HTMLAudioElement[]>([]);
   const loadedRef = useRef(false);
 
-  // lädt Sounddateien
   const loadAudio = () => {
     if (loadedRef.current) return;
     loadedRef.current = true;
@@ -66,7 +65,6 @@ function useSoundPool(
     });
   };
 
-  // iPhone-kompatibles lazy loading
   useEffect(() => {
     const enable = () => {
       loadAudio();
@@ -141,7 +139,7 @@ const warningSounds = [
 export default function Home() {
 
   // =============================================================
-  // UPGRADE-WERTE aus STORE
+  // UPGRADE VALUES
   // =============================================================
   const {
     milkedCount,
@@ -157,23 +155,29 @@ export default function Home() {
   } = useMilkStore();
 
   // =============================================================
+  // GOLDEN MOUSE — NEW STATES
+  // =============================================================
+  const [isGoldenRun, setIsGoldenRun] = useState(false);
+  const [goldClicks, setGoldClicks] = useState(0);
+  const [goldClicksNeeded, setGoldClicksNeeded] = useState(0);
+
+  // =============================================================
   // SOUND POOLS
   // =============================================================
   const getDeepPitch = () => {
     return Math.max(0.7, 1 - totalMilkedCount * 0.005);
   };
 
-  const playStartSound = useSoundPool(startSounds, undefined, true);
-  const playSuccessSound = useSoundPool(successSounds, undefined, true);
-  const playWarningSound = useSoundPool(warningSounds, undefined, true);
+  const playStartSound    = useSoundPool(startSounds, undefined, true);
+  const playSuccessSound  = useSoundPool(successSounds, undefined, true);
+  const playWarningSound  = useSoundPool(warningSounds, undefined, true);
 
-  // overlapping:
-  const playClickSound = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
-  const playFinishSound = useSoundPool(finishSounds, undefined, false);
-  const playMouseSound = useSoundPool(mouseSound, undefined, false);
+  const playClickSound    = useSoundPool(['/mouse/sounds/click.mp3']);
+  const playFinishSound   = useSoundPool(finishSounds);
+  const playMouseSound    = useSoundPool(mouseSound);
 
   // =============================================================
-  // STATE
+  // NORMAL STATES
   // =============================================================
   const [clicks, setClicks] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
@@ -199,10 +203,7 @@ export default function Home() {
   const [comboProgress, setComboProgress] = useState(1);
 
   const comboTimeWindow = 150 * (1 + (comboDecayReduction ?? 0));
-  
-  // =============================================================
-  // MULTIPLIKATOR-LOGIK
-  // =============================================================
+
   const increaseMultiplier = () => {
     const maxMul = 2 + (maxMultiplierBonus ?? 0);
 
@@ -239,9 +240,8 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [multiplier, comboTimeWindow, baseMultiplierBonus]);
 
-
   // =============================================================
-  // PASSIVE INCOME (MouseFood, HamsterWheel, MilkFarm)
+  // PASSIVE MILK
   // =============================================================
   useEffect(() => {
     const interval = setInterval(() => {
@@ -255,7 +255,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [passiveMilk]);
 
-
   // =============================================================
   // THEME MUSIC
   // =============================================================
@@ -267,7 +266,6 @@ export default function Home() {
 
     return () => audio.pause();
   }, []);
-
 
   // =============================================================
   // iPHONE AUDIO UNLOCK
@@ -290,20 +288,19 @@ export default function Home() {
     };
   }, []);
 
-
   // =============================================================
-  // ERFOLGSSOUND + FINISHSOUND
+  // SUCCESS + FINISH SOUND
   // =============================================================
   useEffect(() => {
+    if (isGoldenRun) return; // golden run handled separately
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
-      playSuccessSound();  // exklusiv
-      playFinishSound();   // overlapping
+      playSuccessSound();
+      playFinishSound();
     }
-  }, [clicks, clicksToMilk, hasMilkedThisRound]);
-
+  }, [clicks, clicksToMilk, hasMilkedThisRound, isGoldenRun]);
 
   // =============================================================
-  // ERFOLG → MILCH + EFFEKTE
+  // MILK CONFETTI
   // =============================================================
   const fireMilkConfetti = () => {
     confetti({
@@ -331,15 +328,19 @@ export default function Home() {
     });
   };
 
+  // =============================================================
+  // NORMAL MOUSE FINISH EVENT
+  // =============================================================
   useEffect(() => {
+    if (isGoldenRun) return;
+
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();
     }
-  }, [clicks, clicksToMilk, hasMilkedThisRound, increaseMilkedCount]);
-
+  }, [clicks, clicksToMilk, hasMilkedThisRound, increaseMilkedCount, isGoldenRun]);
 
   // =============================================================
   // WARNING TIMER
@@ -359,45 +360,74 @@ export default function Home() {
     };
   }, []);
 
-
   // =============================================================
-  // CLICK LOGIC
+  // CLICK LOGIC — NORMAL & GOLDEN
   // =============================================================
   const handleMouseClick = () => {
-    if (clicks < clicksToMilk) {
 
-      // Soft-click effect
+    // 1️⃣ GOLDEN MOUSE SPAWN
+    if (!isGoldenRun && Math.random() < 0.04) {
+      setIsGoldenRun(true);
+      setGoldClicks(0);
+      setGoldClicksNeeded(Math.ceil(clicksToMilk * 1.8));
+      return;
+    }
+
+    // 2️⃣ GOLDEN MOUSE RUN
+    if (isGoldenRun) {
       playClickSound();
+      fireMiniMilkParticles();
+      setIsFlipped(prev => !prev);
 
-      // Rare mouse squeak
-      if (Math.random() < 0.1) {
-        playMouseSound();
+      const newGoldClicks = goldClicks + clicksPerMilk * multiplier;
+      setGoldClicks(newGoldClicks);
+
+      // GOLDEN MOUSE FINISHED
+      if (newGoldClicks >= goldClicksNeeded) {
+        triggerShake();
+        playFinishSound();
+
+        // DOUBLE REWARD
+        useMilkStore.setState(state => ({
+          milkedCount: state.milkedCount * 2
+        }));
+
+        confetti({
+          particleCount: 200,
+          spread: 200,
+          startVelocity: 35,
+          colors: ['#ffd700', '#fff9d6', '#ffef9c'],
+          ticks: 300,
+        });
+
+        setIsGoldenRun(false);
       }
 
-      // Combo
+      return; // block normal mouse
+    }
+
+    // 3️⃣ NORMAL MOUSE RUN
+    if (clicks < clicksToMilk) {
+      playClickSound();
+
+      if (Math.random() < 0.1) playMouseSound();
+
       if (comboTimeout) clearTimeout(comboTimeout);
       increaseMultiplier();
 
       const timeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
       setComboTimeout(timeout);
 
-      // Confetti
       fireMiniMilkParticles();
 
-      // Increase clicks
-      setClicks(prev => prev + (clicksPerMilk * multiplier));
-
-      // Flip animation
+      setClicks(prev => prev + clicksPerMilk * multiplier);
       setIsFlipped(prev => !prev);
-
-      // Reset warnings
       resetWarningTimeout();
     }
   };
 
-
   // =============================================================
-  // RESET → NEUE RUNDE
+  // RESET ROUND
   // =============================================================
   const handlePlayAgain = () => {
     playStartSound();
@@ -408,9 +438,8 @@ export default function Home() {
     resetWarningTimeout();
   };
 
-
   // =============================================================
-  // SPACEBAR SUPPORT
+  // SPACEBAR
   // =============================================================
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -418,9 +447,11 @@ export default function Home() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleMouseClick]);
+  });
 
-
+  // =============================================================
+  // RENDER CALCS
+  // =============================================================
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
 
@@ -430,7 +461,6 @@ export default function Home() {
       : multiplier >= 1.5
       ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
       : "";
-
 
   // =============================================================
   // RENDER
@@ -447,19 +477,19 @@ export default function Home() {
         </Link>
       </div>
 
-{/* MILK CONTAINER */}
-<div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
-  <div
-    className="bg-white transition-all duration-500 ease-in-out"
-    style={{ height: `${progress * 100}%` }}
-  ></div>
+      {/* MILK CONTAINER */}
+      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
+        <div
+          className="bg-white transition-all duration-500 ease-in-out"
+          style={{ height: `${progress * 100}%` }}
+        ></div>
 
-  <div className="absolute inset-0 flex items-center justify-center">
-    <span className="text-xs font-bold text-black">
-      {isMounted ? milkedCount.toFixed(0) : "0"}
-    </span>
-  </div>
-</div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold text-black">
+            {isMounted ? milkedCount.toFixed(0) : "0"}
+          </span>
+        </div>
+      </div>
 
       {/* GAME AREA */}
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
@@ -469,14 +499,44 @@ export default function Home() {
               <Rat className="h-8 w-8" /> Mouse Milker
             </CardTitle>
             <CardDescription>
-              {milked
+              {isGoldenRun
+                ? "✨ Goldene Maus! Verdopple deine Milch ✨"
+                : milked
                 ? "You did it!"
                 : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount.toFixed(0)})`}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="flex flex-col items-center justify-center p-6">
-            {milked ? (
+            {isGoldenRun ? (
+              <>
+                {/* GOLDEN MOUSE */}
+                <button
+                  onMouseDown={handleMouseClick}
+                  className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
+                >
+                  <Rat
+                    className={`
+                      h-40 w-40
+                      text-yellow-400
+                      scale-105
+                      transition-transform
+                      drop-shadow-[0_0_30px_rgba(255,215,0,1)]
+                      animate-pulse
+                      ${isFlipped ? "scale-x-[-1]" : ""}
+                    `}
+                  />
+                </button>
+
+                <p className="text-yellow-300 font-bold mt-2 text-xl drop-shadow">
+                  {Math.min(goldClicks, goldClicksNeeded).toFixed(0)} / {goldClicksNeeded}
+                </p>
+
+                <p className="text-sm text-yellow-200 mt-1">
+                  ✨ Voll melken = doppelte Milch!
+                </p>
+              </>
+            ) : milked ? (
               <div className="flex flex-col items-center gap-6">
                 <div className="rounded-xl bg-accent p-6 shadow-inner animate-pulse">
                   <p className="flex items-center gap-2 text-2xl font-bold text-accent-foreground">
@@ -490,7 +550,7 @@ export default function Home() {
             ) : (
               <div className="flex flex-col items-center gap-4">
 
-                {/* Mouse Icon */}
+                {/* NORMAL MOUSE */}
                 <button
                   onMouseDown={handleMouseClick}
                   className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
@@ -526,10 +586,10 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* PASSIVE MILK INFO */}
+                {/* PASSIVE MILK */}
                 {passiveMilk > 0 && (
                   <p className="text-xs mt-2 text-muted-foreground">
-                    +{passiveMilk.toFixed(2)/100} / sec (passiv)
+                    +{(passiveMilk / 60).toFixed(2)} / sec (passiv)
                   </p>
                 )}
               </div>
@@ -539,4 +599,4 @@ export default function Home() {
       </div>
     </main>
   );
-} // <--- END OF FILE
+}

@@ -120,3 +120,16 @@
     @apply bg-background text-foreground transition-colors duration-1000;
   }
 }
+
+@keyframes screenshake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(4px, -2px); }
+  40% { transform: translate(-4px, 3px); }
+  60% { transform: translate(3px, -4px); }
+  80% { transform: translate(-3px, 4px); }
+  100% { transform: translate(0, 0); }
+}
+
+.screenshake {
+  animation: screenshake 150ms cubic-bezier(.36,.07,.19,.97);
+}

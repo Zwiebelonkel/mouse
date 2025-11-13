@@ -280,7 +280,7 @@ export default function Home() {
 
   const resetWarningTimeout = () => {
     if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
-    warningTimeoutRef.current = setTimeout(() => playWarningSound(), 10000);
+    warningTimeoutRef.current = setTimeout(() => playWarningSound(), 8000);
   };
 
   useEffect(() => {

@@ -3,7 +3,7 @@ export const upgrades = {
   extraFinger: {
     name: "Extra Finger",
     description: "+1 Klickkraft",
-    baseCost: 10,
+    baseCost: 5,
     maxLevel: 50,
     effect: (state) => ({
       clicksPerMilk: state.clicksPerMilk + 1,
@@ -13,7 +13,7 @@ export const upgrades = {
   muscleTraining: {
     name: "Muskeltraining",
     description: "+10% Klickkraft",
-    baseCost: 30,
+    baseCost: 10,
     maxLevel: 20,
     effect: (state) => ({
       clicksPerMilk: Math.round(state.clicksPerMilk * 1.1),
@@ -23,7 +23,7 @@ export const upgrades = {
   powerGrip: {
     name: "Power Grip",
     description: "+25% Klickkraft",
-    baseCost: 100,
+    baseCost: 20,
     maxLevel: 15,
     effect: (state) => ({
       clicksPerMilk: Math.round(state.clicksPerMilk * 1.25),
@@ -34,7 +34,7 @@ export const upgrades = {
   comboMaster: {
     name: "Combo Master",
     description: "Combo decay -20%",
-    baseCost: 25,
+    baseCost: 15,
     maxLevel: 10,
     effect: (state) => ({
       comboDecayReduction: state.comboDecayReduction + 0.2,
@@ -44,7 +44,7 @@ export const upgrades = {
   ultraCombo: {
     name: "Ultra Combo",
     description: "Max Multiplikator +0.5",
-    baseCost: 120,
+    baseCost: 18,
     maxLevel: 5,
     effect: (state) => ({
       maxMultiplierBonus: state.maxMultiplierBonus + 0.5,
@@ -65,7 +65,7 @@ export const upgrades = {
   mouseFood: {
     name: "Mausfutter",
     description: "+1 Milch/min",
-    baseCost: 50,
+    baseCost: 10,
     maxLevel: 20,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 1,

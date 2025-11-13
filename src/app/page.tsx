@@ -12,7 +12,7 @@ import {
 import { Rat, ShoppingCart, RefreshCcw, Milk } from 'lucide-react';
 import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
-import confetti from 'canvas-confetti';
+import confetti from "canvas-confetti/dist/confetti.module.mjs";
 
 const startSounds = [
   '/mouse/sounds/start1.mp3',
@@ -44,6 +44,7 @@ const warningSounds = [
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);
+
   const {
     milkedCount,
     totalMilkedCount,
@@ -60,11 +61,12 @@ export default function Home() {
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentlyPlayingSound = useRef<HTMLAudioElement | null>(null);
 
-  // ========== MULTIPLIKATOR ==========
+  // ========= MULTIPLIKATOR =========
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
-  const comboTimeWindow = 400; // ms
+
+  const comboTimeWindow = 400; // ms Zwischenraum
 
   const increaseMultiplier = () => {
     setMultiplier((prev) => {
@@ -74,7 +76,6 @@ export default function Home() {
       if (prev < 1.5) return 1.5;
       return 2;
     });
-
     setComboProgress(1);
   };
 
@@ -83,7 +84,7 @@ export default function Home() {
     setComboProgress(0);
   };
 
-  // Combo-Bar läuft ab
+  // Combo-Bar countdown
   useEffect(() => {
     if (multiplier === 1) return;
 
@@ -101,7 +102,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  // Mini-Milch-Partikel
+  // Mini-Milk Partikel
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -115,7 +116,7 @@ export default function Home() {
     });
   };
 
-  // großes Milch-Konfetti bei Erfolg
+  // Großes Milch-Konfetti
   const fireMilkConfetti = () => {
     confetti({
       particleCount: 50,
@@ -154,6 +155,7 @@ export default function Home() {
 
   useEffect(() => {
     setIsMounted(true);
+
     return () => {
       if (currentlyPlayingSound.current) {
         currentlyPlayingSound.current.pause();
@@ -162,18 +164,21 @@ export default function Home() {
     };
   }, []);
 
+  // Erfolgssound abspielen
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0) {
       playRandomSound(successSounds);
     }
   }, [clicks, clicksToMilk]);
 
-  // Fertig gemolken → Milch + Konfetti
+  // Erfolg → Milch + Konfetti
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
       setHasMilkedThisRound(true);
+
       fireMilkConfetti();
+      triggerShake();
     }
   }, [
     clicks,
@@ -182,19 +187,24 @@ export default function Home() {
     increaseMilkedCount,
   ]);
 
+  const [isShaking, setIsShaking] = useState(false);
+
+  const triggerShake = () => {
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 150);
+  };
+
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
       const clickSound = new Audio('/mouse/sounds/click.mp3');
       clickSound.play();
 
-      // Combo System
+      // Multiplikator
       if (comboTimeout) clearTimeout(comboTimeout);
 
       increaseMultiplier();
 
-      const newTimeout = setTimeout(() => {
-        resetMultiplier();
-      }, comboTimeWindow);
+      const newTimeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
       setComboTimeout(newTimeout);
 
       fireMiniMilkParticles();
@@ -216,9 +226,7 @@ export default function Home() {
   };
 
   const resetWarningTimeout = () => {
-    if (warningTimeoutRef.current) {
-      clearTimeout(warningTimeoutRef.current);
-    }
+    if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
     warningTimeoutRef.current = setTimeout(() => {
       playRandomSound(warningSounds);
     }, 10000);
@@ -226,17 +234,15 @@ export default function Home() {
 
   useEffect(() => {
     resetWarningTimeout();
+
     return () => {
-      if (warningTimeoutRef.current) {
-        clearTimeout(warningTimeoutRef.current);
-      }
+      if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
     };
   }, []);
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
 
-  // Glow bei hohem Multiplikator
   const mouseGlow =
     multiplier >= 2
       ? 'drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse'
@@ -246,8 +252,9 @@ export default function Home() {
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
-      {/* Shop */}
-      <div className="fixed top-4 right-4 z-[99999]">
+
+      {/* SHOP */}
+      <div className="fixed top-4 right-4 z-[20]">
         <Link href="/shop">
           <Button>
             <ShoppingCart className="h-6 w-6" />
@@ -255,12 +262,13 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Milchbehälter */}
-      <div className="fixed bottom-4 right-4 z-[99999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end relative overflow-hidden">
+      {/* MILCH CONTAINER */}
+      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end relative overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${progress * 100}%` }}
         ></div>
+
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-xs font-bold text-black">
             {isMounted ? milkedCount : 0}
@@ -268,73 +276,77 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Karte */}
-      <Card className="w-full max-w-sm text-center shadow-2xl">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-center gap-2 text-4xl font-bold tracking-tight font-headline">
-            <Rat className="h-8 w-8" /> Mouse Milker
-          </CardTitle>
-          <CardDescription>
-            {milked
-              ? 'You did it!'
-              : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`}
-          </CardDescription>
-        </CardHeader>
+      {/* GAME AREA – nur dieser Bereich shake't */}
+      <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
+        <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-center gap-2 text-4xl font-bold tracking-tight font-headline">
+              <Rat className="h-8 w-8" /> Mouse Milker
+            </CardTitle>
+            <CardDescription>
+              {milked
+                ? 'You did it!'
+                : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`}
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="flex h-80 flex-col items-center justify-center p-6">
-          {milked ? (
-            <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in">
-              <div className="rounded-xl bg-accent p-6 shadow-inner">
-                <p className="flex items-center gap-2 text-2xl font-bold text-accent-foreground">
-                  <Milk className="h-6 w-6" /> Du hast die Maus gemolken!
+          <CardContent className="flex h-80 flex-col items-center justify-center p-6">
+            {milked ? (
+              <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in">
+                <div className="rounded-xl bg-accent p-6 shadow-inner">
+                  <p className="flex items-center gap-2 text-2xl font-bold text-accent-foreground">
+                    <Milk className="h-6 w-6" /> Du hast die Maus gemolken!
+                  </p>
+                </div>
+                <Button onClick={handlePlayAgain} size="lg">
+                  <RefreshCcw className="mr-2 h-4 w-4" /> Erneut melken
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <button
+                  onMouseDown={handleMouseClick}
+                  className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
+                  aria-label="Milk the mouse"
+                >
+                  <Rat
+                    className={`h-40 w-40 transition-transform duration-200 ${
+                      isFlipped ? "scale-x-[-1]" : ""
+                    } ${mouseGlow}`}
+                  />
+                </button>
+
+                {/* COMBO BAR */}
+                <div className="w-40 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="h-full bg-white transition-all"
+                    style={{ width: `${comboProgress * 100}%` }}
+                  ></div>
+                </div>
+
+                <p className="text-sm text-muted-foreground mt-1">
+                  {multiplier.toFixed(2)}× Combo
                 </p>
-              </div>
-              <Button onClick={handlePlayAgain} size="lg">
-                <RefreshCcw className="mr-2 h-4 w-4" /> Erneut melken
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <button
-                onMouseDown={handleMouseClick}
-                className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
-                aria-label="Milk the mouse"
-              >
-                <Rat
-                  className={`h-40 w-40 transition-transform duration-200 ${
-                    isFlipped ? 'scale-x-[-1]' : ''
-                  } ${mouseGlow}`}
-                />
-              </button>
 
-              {/* Combo Bar */}
-              <div className="w-40 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
-                <div
-                  className="h-full bg-white transition-all"
-                  style={{ width: `${comboProgress * 100}%` }}
-                ></div>
+                <div className="text-center">
+                  <p className="text-5xl font-bold text-foreground">
+                    {Math.floor(clicks)}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {clicks === 0
+                      ? `Click the mouse ${clicksToMilk} times!`
+                      : `${
+                          clicksToMilk - clicks > 0
+                            ? clicksToMilk - clicks
+                            : 0
+                        } more clicks to go!`}
+                  </p>
+                </div>
               </div>
-
-              <p className="text-sm text-muted-foreground mt-1">
-                {multiplier.toFixed(2)}× Combo
-              </p>
-
-              <div className="text-center">
-                <p className="text-5xl font-bold text-foreground">{clicks}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {clicks === 0
-                    ? `Click the mouse ${clicksToMilk} times!`
-                    : `${
-                        clicksToMilk - clicks > 0
-                          ? clicksToMilk - clicks
-                          : 0
-                      } more clicks to go!`}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }

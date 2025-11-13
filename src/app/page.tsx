@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Rat } from 'lucide-react';
+import { Rat, ShoppingCart, RefreshCcw, Milk } from 'lucide-react';
 import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 
@@ -30,30 +30,27 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentlyPlayingSound = useRef<HTMLAudioElement | null>(null);
 
   const playRandomSound = (sounds: string[]) => {
+    if (currentlyPlayingSound.current) {
+      currentlyPlayingSound.current.pause();
+      currentlyPlayingSound.current.currentTime = 0;
+    }
     const sound = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
     sound.play();
+    currentlyPlayingSound.current = sound;
   };
 
   useEffect(() => {
     setIsMounted(true);
+    return () => {
+      if (currentlyPlayingSound.current) {
+        currentlyPlayingSound.current.pause();
+        currentlyPlayingSound.current.currentTime = 0;
+      }
+    };
   }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('dark', 'theme-darker', 'theme-darkest', 'theme-uncanny');
-
-    if (totalMilkedCount >= 10) {
-      root.classList.add('theme-uncanny');
-    } else if (totalMilkedCount >= 7) {
-      root.classList.add('theme-darkest');
-    } else if (totalMilkedCount >= 4) {
-      root.classList.add('theme-darker');
-    } else if (totalMilkedCount >= 2) {
-      root.classList.add('dark');
-    }
-  }, [totalMilkedCount]);
 
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0) {
@@ -103,7 +100,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 font-body">
       <div className="fixed top-4 right-4 z-[99999]">
         <Link href="/shop">
-          <Button>Shop</Button>
+          <Button>
+            <ShoppingCart className="h-6 w-6" />
+          </Button>
         </Link>
       </div>
       <div className="fixed bottom-4 right-4 z-[99999] w-10 h-48 border-4 border-gray-400 rounded-lg bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end">
@@ -111,11 +110,14 @@ export default function Home() {
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${milkedCount * 10}%` }}
         ></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold text-black">{isMounted ? milkedCount : 0}</span>
+        </div>
       </div>
       <Card className="w-full max-w-sm text-center shadow-2xl">
         <CardHeader>
-          <CardTitle className="font-headline text-4xl font-bold tracking-tight">
-            Mouse Milker
+          <CardTitle className="font-headline text-4xl font-bold tracking-tight flex items-center justify-center gap-2">
+            <Rat className="h-8 w-8" /> Mouse Milker
           </CardTitle>
           <CardDescription>
             {milked
@@ -127,12 +129,12 @@ export default function Home() {
           {milked ? (
             <div className="flex animate-in fade-in zoom-in flex-col items-center gap-6">
               <div className="rounded-xl bg-accent p-6 shadow-inner">
-                <p className="text-2xl font-bold text-accent-foreground">
-                  You milked the mouse!
+                <p className="text-2xl font-bold text-accent-foreground flex items-center gap-2">
+                  <Milk className="h-6 w-6" /> Du hast die Maus gemolken!
                 </p>
               </div>
               <Button onClick={handlePlayAgain} size="lg">
-                Milk Again
+                <RefreshCcw className="mr-2 h-4 w-4" /> Erneut melken
               </Button>
             </div>
           ) : (
@@ -158,7 +160,7 @@ export default function Home() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </card>
     </main>
   );
 }

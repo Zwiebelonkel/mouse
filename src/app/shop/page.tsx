@@ -34,9 +34,9 @@ export default function Shop() {
       <Card className="w-full max-w-sm text-center shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-4xl font-bold tracking-tight">
-            Milking Shop
+            Milch Shop
           </CardTitle>
-          <CardDescription>Your milk: {milkedCount}</CardDescription>
+          <CardDescription>Ihre Milch: {milkedCount}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 p-6">
           <div className="flex flex-col gap-4">
@@ -45,14 +45,14 @@ export default function Shop() {
               disabled={milkedCount < extraFingerCost}
               size="lg"
             >
-              Extra Finger (Cost: {extraFingerCost} Milk)
+              Extra Finger (Kosten: {extraFingerCost} Milch)
             </Button>
             <p className="text-sm text-muted-foreground">
-              Current milking power: {clicksPerMilk}
+              Derzeitige Melk-Kraft: {clicksPerMilk}
             </p>
           </div>
           <Link href="/">
-            <Button>Back to Milking</Button>
+            <Button>Zurück</Button>
           </Link>
         </CardContent>
       </Card>

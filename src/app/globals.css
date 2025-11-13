@@ -90,8 +90,8 @@
     --card: 220 15% 15%; /* Slightly lighter blue-gray for cards */
     --primary: 200 80% 55%; /* Milky light blue */
     --primary-foreground: 210 15% 10%; /* Dark text for primary buttons */
-    --accent: 0 0% 100%; /* Pure white accent for a fresh, milky look */
-    --accent-foreground: 220 15% 10%; /* Dark text for accents */
+    --accent: 45 90% 50%; /* Vibrant yellow */
+    --accent-foreground: 45 90% 10%; /* Dark, contrasting text */
     --border: 220 10% 25%; /* Muted border color */
     --muted-foreground: 210 10% 55%; /* Softer gray for less important text */
   }

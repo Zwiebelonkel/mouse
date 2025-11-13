@@ -22,7 +22,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$
 const buttonVariants = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$class$2d$variance$2d$authority$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cva"])("inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0", {
     variants: {
         variant: {
-            default: "bg-primary text-primary-foreground hover:bg-primary/90",
+            default: "bg-accent text-accent-foreground hover:bg-accent/90",
             destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
             outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
             secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -233,7 +233,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/store/milk.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/canvas-confetti/dist/confetti.module.mjs [app-client] (ecmascript)");
 ;
-var _s = __turbopack_context__.k.signature();
+var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature();
 'use client';
 ;
 ;
@@ -242,11 +242,94 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+// =============================================================
+// iPHONE AUDIO UNLOCK
+// =============================================================
+function unlockIOSAudio() {
+    const empty = new Audio();
+    empty.play().catch(()=>{});
+}
+// =============================================================
+// GLOBAL EXCLUSIVE AUDIO CHANNEL
+// =============================================================
+const exclusiveChannel = {
+    current: null,
+    stop () {
+        if (this.current) {
+            this.current.pause();
+            this.current.currentTime = 0;
+            this.current = null;
+        }
+    },
+    play (audio) {
+        this.stop();
+        this.current = audio;
+        audio.play();
+    }
+};
+// =============================================================
+// SOUND ENGINE
+// =============================================================
+function useSoundPool(paths, getPlaybackRate, exclusive = false) {
+    _s();
+    const poolRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])([]);
+    const loadedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const loadAudio = ()=>{
+        if (loadedRef.current) return;
+        loadedRef.current = true;
+        poolRef.current = paths.map((p)=>{
+            const audio = new Audio(p);
+            audio.load();
+            return audio;
+        });
+    };
+    // Laden erst nach echter User-Interaktion (iPhone-tauglich)
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "useSoundPool.useEffect": ()=>{
+            const enable = {
+                "useSoundPool.useEffect.enable": ()=>{
+                    loadAudio();
+                    window.removeEventListener("touchstart", enable);
+                    window.removeEventListener("mousedown", enable);
+                }
+            }["useSoundPool.useEffect.enable"];
+            window.addEventListener("touchstart", enable, {
+                once: true
+            });
+            window.addEventListener("mousedown", enable, {
+                once: true
+            });
+            return ({
+                "useSoundPool.useEffect": ()=>{
+                    window.removeEventListener("touchstart", enable);
+                    window.removeEventListener("mousedown", enable);
+                }
+            })["useSoundPool.useEffect"];
+        }
+    }["useSoundPool.useEffect"], []);
+    const play = ()=>{
+        if (!loadedRef.current || poolRef.current.length === 0) return;
+        const base = poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
+        const audio = base.cloneNode(true);
+        if (getPlaybackRate) audio.playbackRate = getPlaybackRate();
+        if (exclusive) {
+            exclusiveChannel.play(audio);
+        } else {
+            audio.play(); // overlapping allowed
+        }
+    };
+    return play;
+}
+_s(useSoundPool, "6oCFw38t69a8/YUtMgoRrtdQ5Zo=");
+// =============================================================
+// SOUND LISTS
+// =============================================================
 const startSounds = [
     '/mouse/sounds/start1.mp3',
     '/mouse/sounds/start2.mp3',
     '/mouse/sounds/start3.mp3',
-    '/mouse/sounds/start4.mp3'
+    '/mouse/sounds/start4.mp3',
+    '/mouse/sounds/start5.mp3'
 ];
 const successSounds = [
     '/mouse/sounds/sucess.mp3',
@@ -255,6 +338,13 @@ const successSounds = [
     '/mouse/sounds/sucess4.mp3',
     '/mouse/sounds/sucess5.mp3',
     '/mouse/sounds/sucess6.mp3'
+];
+// Finish → overlapping
+const finishSounds = [
+    '/mouse/sounds/finish1.wav'
+];
+const mouseSound = [
+    '/mouse/sounds/mouse.wav'
 ];
 const warningSounds = [
     '/mouse/sounds/warning.mp3',
@@ -268,19 +358,50 @@ const warningSounds = [
     '/mouse/sounds/warning8.mp3'
 ];
 function Home() {
-    _s();
+    _s1();
+    // =============================================================
+    // DYNAMIC PITCH
+    // =============================================================
+    const getDeepPitch = ()=>{
+        const { totalMilkedCount } = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMilkStore"].getState();
+        return Math.max(0.7, 1 - totalMilkedCount * 0.005);
+    };
+    // =============================================================
+    // SOUND POOLS
+    // =============================================================
+    const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
+    const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
+    const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
+    // Overlapping allowed:
+    const playClickSound = useSoundPool([
+        '/mouse/sounds/click.mp3'
+    ], undefined, false);
+    const playFinishSound = useSoundPool(finishSounds, undefined, false);
+    const playMouseSound = useSoundPool(mouseSound, undefined, false);
+    // =============================================================
+    // STATE
+    // =============================================================
     const [clicks, setClicks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(0);
     const { milkedCount, totalMilkedCount, increaseMilkedCount, clicksPerMilk, clicksToMilk, increaseClicksToMilk } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMilkStore"])();
     const [isMounted, setIsMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isFlipped, setIsFlipped] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [hasMilkedThisRound, setHasMilkedThisRound] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const warningTimeoutRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
-    const currentlyPlayingSound = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
-    // ========= MULTIPLIKATOR =========
+    // =============================================================
+    // SCREENSHAKE
+    // =============================================================
+    const [isShaking, setIsShaking] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const triggerShake = ()=>{
+        setIsShaking(true);
+        setTimeout(()=>setIsShaking(false), 150);
+    };
+    // =============================================================
+    // COMBO SYSTEM
+    // =============================================================
     const [multiplier, setMultiplier] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(1);
     const [comboTimeout, setComboTimeout] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [comboProgress, setComboProgress] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(1);
-    const comboTimeWindow = 400; // ms Zwischenraum
+    const comboTimeWindow = 150;
     const increaseMultiplier = ()=>{
         setMultiplier((prev)=>{
             if (prev >= 2) return 2;
@@ -295,7 +416,6 @@ function Home() {
         setMultiplier(1);
         setComboProgress(0);
     };
-    // Combo-Bar countdown
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Home.useEffect": ()=>{
             if (multiplier === 1) return;
@@ -320,11 +440,13 @@ function Home() {
     }["Home.useEffect"], [
         multiplier
     ]);
-    // Mini-Milk Partikel
+    // =============================================================
+    // CONFETTI EFFECTS
+    // =============================================================
     const fireMiniMilkParticles = ()=>{
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])({
             particleCount: 10,
-            spread: 30,
+            spread: 180,
             startVelocity: 25,
             gravity: 1,
             ticks: 80,
@@ -335,11 +457,10 @@ function Home() {
                 'circle'
             ],
             origin: {
-                y: 0.65
+                y: 0.5
             }
         });
     };
-    // Großes Milch-Konfetti
     const fireMilkConfetti = ()=>{
         (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])({
             particleCount: 50,
@@ -357,57 +478,61 @@ function Home() {
                 y: 0.6
             }
         });
-        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])({
-            particleCount: 25,
-            spread: 100,
-            startVelocity: 20,
-            gravity: 0.9,
-            colors: [
-                '#ffffff'
-            ],
-            shapes: [
-                'circle'
-            ],
-            origin: {
-                y: 0.6
-            }
-        });
     };
-    // Sound Player
-    const playRandomSound = (sounds)=>{
-        if (currentlyPlayingSound.current) {
-            currentlyPlayingSound.current.pause();
-            currentlyPlayingSound.current.currentTime = 0;
-        }
-        const sound = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
-        sound.play();
-        currentlyPlayingSound.current = sound;
-    };
+    // =============================================================
+    // EFFECTS
+    // =============================================================
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Home.useEffect": ()=>{
-            setIsMounted(true);
+            const audio = new Audio('/mouse/sounds/theme.mp3');
+            audio.loop = true;
+            audio.volume = 0.2;
+            audio.play();
             return ({
                 "Home.useEffect": ()=>{
-                    if (currentlyPlayingSound.current) {
-                        currentlyPlayingSound.current.pause();
-                        currentlyPlayingSound.current.currentTime = 0;
-                    }
+                    audio.pause();
                 }
             })["Home.useEffect"];
         }
     }["Home.useEffect"], []);
-    // Erfolgssound abspielen
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Home.useEffect": ()=>{
-            if (clicks >= clicksToMilk && clicks > 0) {
-                playRandomSound(successSounds);
+            setIsMounted(true);
+            const unlock = {
+                "Home.useEffect.unlock": ()=>{
+                    unlockIOSAudio();
+                    window.removeEventListener("touchstart", unlock);
+                    window.removeEventListener("mousedown", unlock);
+                }
+            }["Home.useEffect.unlock"];
+            window.addEventListener("touchstart", unlock, {
+                once: true
+            });
+            window.addEventListener("mousedown", unlock, {
+                once: true
+            });
+            return ({
+                "Home.useEffect": ()=>{
+                    window.removeEventListener("touchstart", unlock);
+                    window.removeEventListener("mousedown", unlock);
+                }
+            })["Home.useEffect"];
+        }
+    }["Home.useEffect"], []);
+    // Erfolgssound + Finishsound
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Home.useEffect": ()=>{
+            if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
+                playSuccessSound(); // exklusiv
+                playFinishSound(); // overlapping
             }
         }
     }["Home.useEffect"], [
         clicks,
-        clicksToMilk
+        clicksToMilk,
+        hasMilkedThisRound
     ]);
-    // Erfolg → Milch + Konfetti
+    // Erfolg → Milch + Effekte
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Home.useEffect": ()=>{
             if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
@@ -423,39 +548,14 @@ function Home() {
         hasMilkedThisRound,
         increaseMilkedCount
     ]);
-    const [isShaking, setIsShaking] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const triggerShake = ()=>{
-        setIsShaking(true);
-        setTimeout(()=>setIsShaking(false), 150);
-    };
-    const handleMouseClick = ()=>{
-        if (clicks < clicksToMilk) {
-            const clickSound = new Audio('/mouse/sounds/click.mp3');
-            clickSound.play();
-            // Multiplikator
-            if (comboTimeout) clearTimeout(comboTimeout);
-            increaseMultiplier();
-            const newTimeout = setTimeout(()=>resetMultiplier(), comboTimeWindow);
-            setComboTimeout(newTimeout);
-            fireMiniMilkParticles();
-            setClicks((prev)=>prev + clicksPerMilk * multiplier);
-            setIsFlipped((prev)=>!prev);
-            resetWarningTimeout();
-        }
-    };
-    const handlePlayAgain = ()=>{
-        playRandomSound(startSounds);
-        setClicks(0);
-        increaseClicksToMilk();
-        setHasMilkedThisRound(false);
-        resetMultiplier();
-        resetWarningTimeout();
-    };
+    // =============================================================
+    // WARNING TIMER
+    // =============================================================
     const resetWarningTimeout = ()=>{
         if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
         warningTimeoutRef.current = setTimeout(()=>{
-            playRandomSound(warningSounds);
-        }, 10000);
+            playWarningSound();
+        }, 8000);
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Home.useEffect": ()=>{
@@ -467,9 +567,53 @@ function Home() {
             })["Home.useEffect"];
         }
     }["Home.useEffect"], []);
+    // =============================================================
+    // CLICK LOGIC
+    // =============================================================
+    const handleMouseClick = ()=>{
+        if (clicks < clicksToMilk) {
+            playClickSound();
+            if (Math.random() < 0.1) {
+                playMouseSound();
+            }
+            if (comboTimeout) clearTimeout(comboTimeout);
+            increaseMultiplier();
+            const to = setTimeout(()=>resetMultiplier(), comboTimeWindow);
+            setComboTimeout(to);
+            fireMiniMilkParticles();
+            setClicks((prev)=>prev + clicksPerMilk * multiplier);
+            setIsFlipped((prev)=>!prev);
+            resetWarningTimeout();
+        }
+    };
+    const handlePlayAgain = ()=>{
+        playStartSound();
+        setClicks(0);
+        setHasMilkedThisRound(false);
+        increaseClicksToMilk();
+        resetMultiplier();
+        resetWarningTimeout();
+    };
+    // Spacebar
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Home.useEffect": ()=>{
+            const handler = {
+                "Home.useEffect.handler": (e)=>{
+                    if (e.code === "Space") handleMouseClick();
+                }
+            }["Home.useEffect.handler"];
+            window.addEventListener("keydown", handler);
+            return ({
+                "Home.useEffect": ()=>window.removeEventListener("keydown", handler)
+            })["Home.useEffect"];
+        }
+    }["Home.useEffect"]);
     const milked = clicks >= clicksToMilk;
     const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
-    const mouseGlow = multiplier >= 2 ? 'drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse' : multiplier >= 1.5 ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]' : '';
+    const mouseGlow = multiplier >= 2 ? "drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse" : multiplier >= 1.5 ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]" : "";
+    // =============================================================
+    // RENDER
+    // =============================================================
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
         className: "flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden",
         children: [
@@ -482,22 +626,22 @@ function Home() {
                             className: "h-6 w-6"
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 260,
+                            lineNumber: 395,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 259,
+                        lineNumber: 394,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 258,
+                    lineNumber: 393,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 257,
+                lineNumber: 392,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -510,7 +654,7 @@ function Home() {
                         }
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 267,
+                        lineNumber: 402,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -520,18 +664,18 @@ function Home() {
                             children: isMounted ? milkedCount : 0
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 273,
+                            lineNumber: 408,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 272,
+                        lineNumber: 407,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 266,
+                lineNumber: 401,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -542,39 +686,39 @@ function Home() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardHeader"], {
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardTitle"], {
-                                    className: "flex items-center justify-center gap-2 text-4xl font-bold tracking-tight font-headline",
+                                    className: "text-accent flex items-center justify-center gap-2 text-4xl font-bold font-headline",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rat$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Rat$3e$__["Rat"], {
                                             className: "h-8 w-8"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 284,
+                                            lineNumber: 419,
                                             columnNumber: 15
                                         }, this),
                                         " Mouse Milker"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 283,
+                                    lineNumber: 418,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
-                                    children: milked ? 'You did it!' : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`
+                                    children: milked ? "You did it!" : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 286,
+                                    lineNumber: 421,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 282,
+                            lineNumber: 417,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
                             className: "flex flex-col items-center justify-center p-6",
                             children: milked ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex flex-col items-center gap-6 animate-in fade-in zoom-in",
+                                className: "flex flex-col items-center gap-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "rounded-xl bg-accent p-6 shadow-inner",
@@ -585,19 +729,19 @@ function Home() {
                                                     className: "h-6 w-6"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 298,
+                                                    lineNumber: 433,
                                                     columnNumber: 21
                                                 }, this),
                                                 " Du hast die Maus gemolken!"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 297,
+                                            lineNumber: 432,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 296,
+                                        lineNumber: 431,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -608,20 +752,20 @@ function Home() {
                                                 className: "mr-2 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 302,
+                                                lineNumber: 437,
                                                 columnNumber: 19
                                             }, this),
                                             " Erneut melken"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 301,
+                                        lineNumber: 436,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 295,
+                                lineNumber: 430,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex flex-col items-center gap-4",
@@ -629,34 +773,33 @@ function Home() {
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                         onMouseDown: handleMouseClick,
                                         className: "cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90",
-                                        "aria-label": "Milk the mouse",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rat$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Rat$3e$__["Rat"], {
                                             className: `h-40 w-40 transition-transform duration-200 ${isFlipped ? "scale-x-[-1]" : ""} ${mouseGlow}`
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 312,
+                                            lineNumber: 447,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 307,
+                                        lineNumber: 443,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "w-40 h-2 bg-gray-300 rounded-full overflow-hidden mt-1",
+                                        className: "w-40 h-2 bg-accent/20 rounded-full overflow-hidden mt-1",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "h-full bg-white transition-all",
+                                            className: "h-full bg-accent transition-all",
                                             style: {
                                                 width: `${comboProgress * 100}%`
                                             }
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 321,
+                                            lineNumber: 456,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 320,
+                                        lineNumber: 455,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -667,7 +810,7 @@ function Home() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 327,
+                                        lineNumber: 462,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -678,7 +821,7 @@ function Home() {
                                                 children: Math.floor(clicks)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 332,
+                                                lineNumber: 467,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -686,46 +829,52 @@ function Home() {
                                                 children: clicks === 0 ? `Click the mouse ${clicksToMilk} times!` : `${clicksToMilk - clicks > 0 ? Math.round(clicksToMilk - clicks) : 0} more clicks to go!`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 335,
+                                                lineNumber: 470,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 331,
+                                        lineNumber: 466,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 306,
+                                lineNumber: 441,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 293,
+                            lineNumber: 428,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 281,
+                    lineNumber: 416,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 280,
+                lineNumber: 415,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/page.tsx",
-        lineNumber: 254,
+        lineNumber: 389,
         columnNumber: 5
     }, this);
 }
-_s(Home, "PeqMgtQntbj06uoHuvTQZwEUjcw=", false, function() {
+_s1(Home, "iBhhsMoFP1l3SANQ+QdVU4U7Jf0=", false, function() {
     return [
+        useSoundPool,
+        useSoundPool,
+        useSoundPool,
+        useSoundPool,
+        useSoundPool,
+        useSoundPool,
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMilkStore"]
     ];
 });

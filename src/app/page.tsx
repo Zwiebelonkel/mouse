@@ -195,7 +195,7 @@ export default function Home() {
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
 
-  const comboTimeWindow = 400;
+  const comboTimeWindow = 150;
 
   const increaseMultiplier = () => {
     setMultiplier((prev) => {
@@ -236,13 +236,13 @@ export default function Home() {
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
-      spread: 30,
+      spread: 180,
       startVelocity: 25,
       gravity: 1,
       ticks: 80,
       colors: ['#ffffff'],
       shapes: ['circle'],
-      origin: { y: 0.65 },
+      origin: { y: 0.5 },
     });
   };
 
@@ -415,7 +415,7 @@ export default function Home() {
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
         <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
           <CardHeader>
-            <CardTitle className="flex items-center justify-center gap-2 text-4xl font-bold font-headline">
+            <CardTitle className="text-accent flex items-center justify-center gap-2 text-4xl font-bold font-headline">
               <Rat className="h-8 w-8" /> Mouse Milker
             </CardTitle>
             <CardDescription>
@@ -452,9 +452,9 @@ export default function Home() {
                 </button>
 
                 {/* Combo Bar */}
-                <div className="w-40 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
+                <div className="w-40 h-2 bg-accent/20 rounded-full overflow-hidden mt-1">
                   <div
-                    className="h-full bg-white transition-all"
+                    className="h-full bg-accent transition-all"
                     style={{ width: `${comboProgress * 100}%` }}
                   ></div>
                 </div>

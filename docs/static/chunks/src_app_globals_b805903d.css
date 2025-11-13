@@ -322,8 +322,8 @@ img, video {
   --card: 220 15% 15%;
   --primary: 200 80% 55%;
   --primary-foreground: 210 15% 10%;
-  --accent: 0 0% 100%;
-  --accent-foreground: 220 15% 10%;
+  --accent: 45 90% 50%;
+  --accent-foreground: 45 90% 10%;
   --border: 220 10% 25%;
   --muted-foreground: 210 10% 55%;
 }
@@ -1210,6 +1210,10 @@ body {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
+.bg-accent\/20 {
+  background-color: hsl(var(--accent) / .2);
+}
+
 .fill-current {
   fill: currentColor;
 }
@@ -1485,6 +1489,10 @@ body {
   color: hsl(var(--sidebar-foreground) / .7);
 }
 
+.text-accent {
+  color: hsl(var(--accent));
+}
+
 .underline-offset-4 {
   text-underline-offset: 4px;
 }
@@ -1702,12 +1710,8 @@ body {
   animation-duration: .15s;
 }
 
-.fade-in, .fade-in-0 {
+.fade-in-0 {
   --tw-enter-opacity: 0;
-}
-
-.zoom-in {
-  --tw-enter-scale: 0;
 }
 
 .zoom-in-95 {
@@ -1861,6 +1865,10 @@ body {
 
 .hover\:bg-sidebar-accent:hover {
   background-color: hsl(var(--sidebar-accent));
+}
+
+.hover\:bg-accent\/90:hover {
+  background-color: hsl(var(--accent) / .9);
 }
 
 .hover\:text-accent-foreground:hover {

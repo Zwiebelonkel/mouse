@@ -263,7 +263,7 @@ export default function Home() {
       </div>
 
       {/* MILCH CONTAINER */}
-      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end relative overflow-hidden">
+      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${progress * 100}%` }}
@@ -337,7 +337,7 @@ export default function Home() {
                       ? `Click the mouse ${clicksToMilk} times!`
                       : `${
                           clicksToMilk - clicks > 0
-                            ? clicksToMilk - clicks
+                            ? Math.round(clicksToMilk - clicks)
                             : 0
                         } more clicks to go!`}
                   </p>

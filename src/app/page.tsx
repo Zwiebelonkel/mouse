@@ -447,19 +447,19 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* MILK CONTAINER */}
-      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
-        <div
-          className="bg-white transition-all duration-500 ease-in-out"
-          style={{ height: `${progress * 100}%` }}
-        ></div>
+{/* MILK CONTAINER */}
+<div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
+  <div
+    className="bg-white transition-all duration-500 ease-in-out"
+    style={{ height: `${progress * 100}%` }}
+  ></div>
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-muted-foreground">
-            {isMounted ? milkedCount.toFixed(0) : "0"}
-          </span>
-        </div>
-      </div>
+  <div className="absolute inset-0 flex items-center justify-center">
+    <span className="text-xs font-bold text-black">
+      {isMounted ? milkedCount.toFixed(0) : "0"}
+    </span>
+  </div>
+</div>
 
       {/* GAME AREA */}
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>

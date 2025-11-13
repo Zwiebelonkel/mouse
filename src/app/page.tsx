@@ -114,8 +114,7 @@ const successSounds = [
 
 // 🎉 NEUER FINISH-SOUND
 const finishSounds = [
-  '/mouse/sounds/finish1.mp3',
-  '/mouse/sounds/finish2.mp3'
+  '/mouse/sounds/finish1.wav',
 ];
 
 const warningSounds = [

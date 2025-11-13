@@ -14,17 +14,17 @@ import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 
-/* ============================================================
-                      iPHONE AUDIO UNLOCK
-============================================================ */
+// =============================================================
+// iPHONE AUDIO UNLOCK
+// =============================================================
 function unlockIOSAudio() {
   const empty = new Audio();
   empty.play().catch(() => {});
 }
 
-/* ============================================================
-                GLOBAL EXCLUSIVE AUDIO CHANNEL
-============================================================ */
+// =============================================================
+// GLOBAL EXCLUSIVE AUDIO CHANNEL
+// =============================================================
 const exclusiveChannel = {
   current: null as HTMLAudioElement | null,
 
@@ -43,9 +43,9 @@ const exclusiveChannel = {
   }
 };
 
-/* ============================================================
-                        SOUND ENGINE
-============================================================ */
+// =============================================================
+// SOUND ENGINE
+// =============================================================
 function useSoundPool(
   paths: string[],
   getPlaybackRate?: () => number,
@@ -102,9 +102,9 @@ function useSoundPool(
   return play;
 }
 
-/* ============================================================
-                        SOUND LISTS
-============================================================ */
+// =============================================================
+// SOUND LISTS
+// =============================================================
 const startSounds = [
   '/mouse/sounds/start1.mp3',
   '/mouse/sounds/start2.mp3',
@@ -124,6 +124,7 @@ const successSounds = [
 
 // Finish → overlapping
 const finishSounds = ['/mouse/sounds/finish1.wav'];
+const mouseSound = ['/mouse/sounds/mouse.wav'];
 
 const warningSounds = [
   '/mouse/sounds/warning.mp3',
@@ -139,17 +140,17 @@ const warningSounds = [
 
 export default function Home() {
 
-  /* ============================================================
-                        DYNAMIC PITCH
-  ============================================================ */
+  // =============================================================
+  // DYNAMIC PITCH
+  // =============================================================
   const getDeepPitch = () => {
     const { totalMilkedCount } = useMilkStore.getState();
     return Math.max(0.7, 1 - totalMilkedCount * 0.005);
   };
 
-  /* ============================================================
-                    SOUND POOLS
-  ============================================================ */
+  // =============================================================
+  // SOUND POOLS
+  // =============================================================
   const playStartSound   = useSoundPool(startSounds, getDeepPitch, true);
   const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
   const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
@@ -157,10 +158,11 @@ export default function Home() {
   // Overlapping allowed:
   const playClickSound   = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
   const playFinishSound  = useSoundPool(finishSounds, undefined, false);
+  const playMouseSound   = useSoundPool(mouseSound, undefined, false);
 
-  /* ============================================================
-                      STATE
-  ============================================================ */
+  // =============================================================
+  // STATE
+  // =============================================================
   const [clicks, setClicks] = useState(0);
   const {
     milkedCount,
@@ -177,18 +179,18 @@ export default function Home() {
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  /* ============================================================
-                         SCREENSHAKE
-  ============================================================ */
+  // =============================================================
+  // SCREENSHAKE
+  // =============================================================
   const [isShaking, setIsShaking] = useState(false);
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 150);
   };
 
-  /* ============================================================
-                       COMBO SYSTEM
-  ============================================================ */
+  // =============================================================
+  // COMBO SYSTEM
+  // =============================================================
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
@@ -228,9 +230,9 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  /* ============================================================
-                     CONFETTI EFFECTS
-  ============================================================ */
+  // =============================================================
+  // CONFETTI EFFECTS
+  // =============================================================
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -257,9 +259,20 @@ export default function Home() {
     });
   };
 
-  /* ============================================================
-                           EFFECTS
-  ============================================================ */
+  // =============================================================
+  // EFFECTS
+  // =============================================================
+  useEffect(() => {
+    const audio = new Audio('/mouse/sounds/theme.mp3');
+    audio.loop = true;
+    audio.volume = 0.2;
+    audio.play();
+
+    return () => {
+      audio.pause();
+    };
+  }, []);
+
   useEffect(() => {
     setIsMounted(true);
 
@@ -297,9 +310,9 @@ export default function Home() {
     }
   }, [clicks, clicksToMilk, hasMilkedThisRound, increaseMilkedCount]);
 
-  /* ============================================================
-                        WARNING TIMER
-  ============================================================ */
+  // =============================================================
+  // WARNING TIMER
+  // =============================================================
   const resetWarningTimeout = () => {
     if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
 
@@ -315,12 +328,16 @@ export default function Home() {
     };
   }, []);
 
-  /* ============================================================
-                         CLICK LOGIC
-  ============================================================ */
+  // =============================================================
+  // CLICK LOGIC
+  // =============================================================
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
       playClickSound();
+
+      if (Math.random() < 0.1) {
+        playMouseSound();
+      }
 
       if (comboTimeout) clearTimeout(comboTimeout);
       increaseMultiplier();
@@ -365,9 +382,9 @@ export default function Home() {
       ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
       : "";
 
-  /* ============================================================
-                           RENDER
-  ============================================================ */
+  // =============================================================
+  // RENDER
+  // =============================================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
 

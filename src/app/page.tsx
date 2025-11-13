@@ -366,7 +366,7 @@ export default function Home() {
   const handleMouseClick = () => {
 
     // 1️⃣ GOLDEN MOUSE SPAWN
-    if (!isGoldenRun && Math.random() < 0.04) {
+    if (!isGoldenRun && Math.random() < 1) {
       setIsGoldenRun(true);
       setGoldClicks(0);
       setGoldClicksNeeded(Math.ceil(clicksToMilk * 1.8));

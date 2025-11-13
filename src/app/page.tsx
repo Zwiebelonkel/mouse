@@ -270,7 +270,7 @@ export default function Home() {
         ></div>
 
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-black">
+          <span className="text-xs font-bold text-muted-foreground">
             {isMounted ? milkedCount : 0}
           </span>
         </div>

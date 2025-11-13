@@ -263,7 +263,7 @@ export default function Home() {
       </div>
 
       {/* MILCH CONTAINER */}
-      <div className="fixed bottom-4 right-4 z-[5] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
+      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
           style={{ height: `${progress * 100}%` }}
@@ -290,7 +290,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="flex h-80 flex-col items-center justify-center p-6">
+          <CardContent className="flex flex-col items-center justify-center p-6">
             {milked ? (
               <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in">
                 <div className="rounded-xl bg-accent p-6 shadow-inner">

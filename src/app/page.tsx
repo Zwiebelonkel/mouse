@@ -25,8 +25,13 @@ function unlockIOSAudio() {
 // ===================================
 //           SOUND ENGINE
 // ===================================
-function useSoundPool(paths: string[], getPlaybackRate?: () => number) {
+function useSoundPool(
+  paths: string[],
+  getPlaybackRate?: () => number,
+  exclusive: boolean = false
+) {
   const poolRef = useRef<HTMLAudioElement[]>([]);
+  const activeRef = useRef<HTMLAudioElement[]>([]);
   const loadedRef = useRef(false);
 
   const loadAudio = () => {
@@ -40,32 +45,48 @@ function useSoundPool(paths: string[], getPlaybackRate?: () => number) {
     });
   };
 
-  // Lade die Sounds erst NACH dem ersten Tap
+  // lade erst nach User-Tap
   useEffect(() => {
     const enable = () => {
       loadAudio();
-      window.removeEventListener("touchstart", enable);
-      window.removeEventListener("mousedown", enable);
+      window.removeEventListener('touchstart', enable);
+      window.removeEventListener('mousedown', enable);
     };
 
-    window.addEventListener("touchstart", enable, { once: true });
-    window.addEventListener("mousedown", enable, { once: true });
+    window.addEventListener('touchstart', enable, { once: true });
+    window.addEventListener('mousedown', enable, { once: true });
 
     return () => {
-      window.removeEventListener("touchstart", enable);
-      window.removeEventListener("mousedown", enable);
+      window.removeEventListener('touchstart', enable);
+      window.removeEventListener('mousedown', enable);
     };
   }, []);
 
   const play = () => {
     if (!loadedRef.current || poolRef.current.length === 0) return;
 
+    // 🔇 EXKLUSIV-SOUND → stoppe alle vorherigen
+    if (exclusive) {
+      activeRef.current.forEach((a) => {
+        a.pause();
+        a.currentTime = 0;
+      });
+      activeRef.current = [];
+    }
+
     const original =
       poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
 
     const clone = original.cloneNode(true) as HTMLAudioElement;
     if (getPlaybackRate) clone.playbackRate = getPlaybackRate();
+
     clone.play();
+    activeRef.current.push(clone);
+
+    // automatisch entfernen
+    clone.onended = () => {
+      activeRef.current = activeRef.current.filter((a) => a !== clone);
+    };
   };
 
   return play;
@@ -91,6 +112,12 @@ const successSounds = [
   '/mouse/sounds/sucess6.mp3',
 ];
 
+// 🎉 NEUER FINISH-SOUND
+const finishSounds = [
+  '/mouse/sounds/finish1.mp3',
+  '/mouse/sounds/finish2.mp3'
+];
+
 const warningSounds = [
   '/mouse/sounds/warning.mp3',
   '/mouse/sounds/warning1.mp3',
@@ -112,14 +139,16 @@ export default function Home() {
   };
 
   // 🔊 Soundpools
-  const playStartSound = useSoundPool(startSounds, getDeepPitch);
-  const playSuccessSound = useSoundPool(successSounds, getDeepPitch);
-  const playWarningSound = useSoundPool(warningSounds, getDeepPitch);
+  const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
+  const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
+  const playFinishSound = useSoundPool(finishSounds, getDeepPitch, true);
+  const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
 
-  const playClickSound = useSoundPool(['/mouse/sounds/click.mp3']);
+  // Clicksound darf überlappen, keine Pitch-Änderung
+  const playClickSound = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
 
   // ===================================
-  //         STATES
+  //          STATES
   // ===================================
   const [clicks, setClicks] = useState(0);
   const {
@@ -137,23 +166,16 @@ export default function Home() {
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ===================================
-  //        SCREEN SHAKE
-  // ===================================
   const [isShaking, setIsShaking] = useState(false);
-
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 150);
   };
 
-  // ===================================
-  //         COMBO SYSTEM
-  // ===================================
+  // COMBO SYSTEM
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
-
   const comboTimeWindow = 400;
 
   const increaseMultiplier = () => {
@@ -187,9 +209,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  // ===================================
-  //         PARTICLE EFFECTS
-  // ===================================
+  // MINI MILK PARTICLES
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -203,6 +223,7 @@ export default function Home() {
     });
   };
 
+  // GROSSES MILK KONFETTI
   const fireMilkConfetti = () => {
     confetti({
       particleCount: 50,
@@ -225,23 +246,28 @@ export default function Home() {
     // iPhone Audio Unlock
     const unlock = () => {
       unlockIOSAudio();
-      window.removeEventListener("touchstart", unlock);
-      window.removeEventListener("mousedown", unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('mousedown', unlock);
     };
 
-    window.addEventListener("touchstart", unlock, { once: true });
-    window.addEventListener("mousedown", unlock, { once: true });
+    window.addEventListener('touchstart', unlock, { once: true });
+    window.addEventListener('mousedown', unlock, { once: true });
 
     return () => {
-      window.removeEventListener("touchstart", unlock);
-      window.removeEventListener("mousedown", unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('mousedown', unlock);
     };
   }, []);
 
+  // Erfolgssound
   useEffect(() => {
-    if (clicks >= clicksToMilk && clicks > 0) playSuccessSound();
-  }, [clicks, clicksToMilk]);
+    if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
+      playSuccessSound();
+      playFinishSound();   // 🎉 neuer Finish-Sound
+    }
+  }, [clicks, clicksToMilk, hasMilkedThisRound]);
 
+  // Erfolg → Milch erhöhen
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
@@ -265,7 +291,7 @@ export default function Home() {
   }, []);
 
   // ===================================
-  //           MAIN CLICK LOGIC
+  //         MAIN CLICK LOGIC
   // ===================================
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
@@ -295,7 +321,7 @@ export default function Home() {
     resetWarningTimeout();
   };
 
-  // Spacebar Support
+  // SPACEBAR
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.code === 'Space') handleMouseClick();

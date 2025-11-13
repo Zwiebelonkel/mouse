@@ -140,11 +140,12 @@ export default function Home() {
   // 🔊 Soundpools
   const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
   const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
-  const playFinishSound = useSoundPool(finishSounds, getDeepPitch, true);
   const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
 
   // Clicksound darf überlappen, keine Pitch-Änderung
   const playClickSound = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
+  const playFinishSound = useSoundPool(['/mouse/sounds/finish1.wav'], undefined, false);
+
 
   // ===================================
   //          STATES

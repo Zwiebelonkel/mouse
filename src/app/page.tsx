@@ -14,24 +14,44 @@ import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 
-// ===================================
-//        iPHONE AUDIO UNLOCK
-// ===================================
+/* ============================================================
+                      iPHONE AUDIO UNLOCK
+============================================================ */
 function unlockIOSAudio() {
   const empty = new Audio();
   empty.play().catch(() => {});
 }
 
-// ===================================
-//           SOUND ENGINE
-// ===================================
+/* ============================================================
+                GLOBAL EXCLUSIVE AUDIO CHANNEL
+============================================================ */
+const exclusiveChannel = {
+  current: null as HTMLAudioElement | null,
+
+  stop() {
+    if (this.current) {
+      this.current.pause();
+      this.current.currentTime = 0;
+      this.current = null;
+    }
+  },
+
+  play(audio: HTMLAudioElement) {
+    this.stop();
+    this.current = audio;
+    audio.play();
+  }
+};
+
+/* ============================================================
+                        SOUND ENGINE
+============================================================ */
 function useSoundPool(
   paths: string[],
   getPlaybackRate?: () => number,
   exclusive: boolean = false
 ) {
   const poolRef = useRef<HTMLAudioElement[]>([]);
-  const activeRef = useRef<HTMLAudioElement[]>([]);
   const loadedRef = useRef(false);
 
   const loadAudio = () => {
@@ -45,56 +65,46 @@ function useSoundPool(
     });
   };
 
-  // lade erst nach User-Tap
+  // Laden erst nach echter User-Interaktion (iPhone-tauglich)
   useEffect(() => {
     const enable = () => {
       loadAudio();
-      window.removeEventListener('touchstart', enable);
-      window.removeEventListener('mousedown', enable);
+      window.removeEventListener("touchstart", enable);
+      window.removeEventListener("mousedown", enable);
     };
 
-    window.addEventListener('touchstart', enable, { once: true });
-    window.addEventListener('mousedown', enable, { once: true });
+    window.addEventListener("touchstart", enable, { once: true });
+    window.addEventListener("mousedown", enable, { once: true });
 
     return () => {
-      window.removeEventListener('touchstart', enable);
-      window.removeEventListener('mousedown', enable);
+      window.removeEventListener("touchstart", enable);
+      window.removeEventListener("mousedown", enable);
     };
   }, []);
 
   const play = () => {
     if (!loadedRef.current || poolRef.current.length === 0) return;
 
-    // 🔇 EXKLUSIV-SOUND → stoppe alle vorherigen
-    if (exclusive) {
-      activeRef.current.forEach((a) => {
-        a.pause();
-        a.currentTime = 0;
-      });
-      activeRef.current = [];
-    }
-
-    const original =
+    const base =
       poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
 
-    const clone = original.cloneNode(true) as HTMLAudioElement;
-    if (getPlaybackRate) clone.playbackRate = getPlaybackRate();
+    const audio = base.cloneNode(true) as HTMLAudioElement;
 
-    clone.play();
-    activeRef.current.push(clone);
+    if (getPlaybackRate) audio.playbackRate = getPlaybackRate();
 
-    // automatisch entfernen
-    clone.onended = () => {
-      activeRef.current = activeRef.current.filter((a) => a !== clone);
-    };
+    if (exclusive) {
+      exclusiveChannel.play(audio);
+    } else {
+      audio.play(); // overlapping allowed
+    }
   };
 
   return play;
 }
 
-// =====================
-//      SOUND LISTS
-// =====================
+/* ============================================================
+                        SOUND LISTS
+============================================================ */
 const startSounds = [
   '/mouse/sounds/start1.mp3',
   '/mouse/sounds/start2.mp3',
@@ -112,10 +122,8 @@ const successSounds = [
   '/mouse/sounds/sucess6.mp3',
 ];
 
-// 🎉 NEUER FINISH-SOUND
-const finishSounds = [
-  '/mouse/sounds/finish1.wav',
-];
+// Finish → overlapping
+const finishSounds = ['/mouse/sounds/finish1.wav'];
 
 const warningSounds = [
   '/mouse/sounds/warning.mp3',
@@ -131,25 +139,28 @@ const warningSounds = [
 
 export default function Home() {
 
-  // 💿 Tiefere Sounds pro gemolkener Maus
+  /* ============================================================
+                        DYNAMIC PITCH
+  ============================================================ */
   const getDeepPitch = () => {
     const { totalMilkedCount } = useMilkStore.getState();
     return Math.max(0.7, 1 - totalMilkedCount * 0.005);
   };
 
-  // 🔊 Soundpools
-  const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
+  /* ============================================================
+                    SOUND POOLS
+  ============================================================ */
+  const playStartSound   = useSoundPool(startSounds, getDeepPitch, true);
   const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
   const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
 
-  // Clicksound darf überlappen, keine Pitch-Änderung
-  const playClickSound = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
-  const playFinishSound = useSoundPool(['/mouse/sounds/finish1.wav'], undefined, false);
+  // Overlapping allowed:
+  const playClickSound   = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
+  const playFinishSound  = useSoundPool(finishSounds, undefined, false);
 
-
-  // ===================================
-  //          STATES
-  // ===================================
+  /* ============================================================
+                      STATE
+  ============================================================ */
   const [clicks, setClicks] = useState(0);
   const {
     milkedCount,
@@ -166,16 +177,22 @@ export default function Home() {
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  /* ============================================================
+                         SCREENSHAKE
+  ============================================================ */
   const [isShaking, setIsShaking] = useState(false);
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 150);
   };
 
-  // COMBO SYSTEM
+  /* ============================================================
+                       COMBO SYSTEM
+  ============================================================ */
   const [multiplier, setMultiplier] = useState(1);
   const [comboTimeout, setComboTimeout] = useState<NodeJS.Timeout | null>(null);
   const [comboProgress, setComboProgress] = useState(1);
+
   const comboTimeWindow = 400;
 
   const increaseMultiplier = () => {
@@ -196,6 +213,7 @@ export default function Home() {
 
   useEffect(() => {
     if (multiplier === 1) return;
+
     const interval = setInterval(() => {
       setComboProgress((prev) => {
         const next = prev - 0.02;
@@ -206,10 +224,13 @@ export default function Home() {
         return next;
       });
     }, comboTimeWindow / 50);
+
     return () => clearInterval(interval);
   }, [multiplier]);
 
-  // MINI MILK PARTICLES
+  /* ============================================================
+                     CONFETTI EFFECTS
+  ============================================================ */
   const fireMiniMilkParticles = () => {
     confetti({
       particleCount: 10,
@@ -223,7 +244,6 @@ export default function Home() {
     });
   };
 
-  // GROSSES MILK KONFETTI
   const fireMilkConfetti = () => {
     confetti({
       particleCount: 50,
@@ -237,37 +257,36 @@ export default function Home() {
     });
   };
 
-  // ===================================
-  //            EFFECTS
-  // ===================================
+  /* ============================================================
+                           EFFECTS
+  ============================================================ */
   useEffect(() => {
     setIsMounted(true);
 
-    // iPhone Audio Unlock
     const unlock = () => {
       unlockIOSAudio();
-      window.removeEventListener('touchstart', unlock);
-      window.removeEventListener('mousedown', unlock);
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("mousedown", unlock);
     };
 
-    window.addEventListener('touchstart', unlock, { once: true });
-    window.addEventListener('mousedown', unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
+    window.addEventListener("mousedown", unlock, { once: true });
 
     return () => {
-      window.removeEventListener('touchstart', unlock);
-      window.removeEventListener('mousedown', unlock);
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("mousedown", unlock);
     };
   }, []);
 
-  // Erfolgssound
+  // Erfolgssound + Finishsound
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
-      playSuccessSound();
-      playFinishSound();   // 🎉 neuer Finish-Sound
+      playSuccessSound();   // exklusiv
+      playFinishSound();    // overlapping
     }
   }, [clicks, clicksToMilk, hasMilkedThisRound]);
 
-  // Erfolg → Milch erhöhen
+  // Erfolg → Milch + Effekte
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
@@ -278,9 +297,15 @@ export default function Home() {
     }
   }, [clicks, clicksToMilk, hasMilkedThisRound, increaseMilkedCount]);
 
+  /* ============================================================
+                        WARNING TIMER
+  ============================================================ */
   const resetWarningTimeout = () => {
     if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
-    warningTimeoutRef.current = setTimeout(() => playWarningSound(), 8000);
+
+    warningTimeoutRef.current = setTimeout(() => {
+      playWarningSound();
+    }, 8000);
   };
 
   useEffect(() => {
@@ -290,9 +315,9 @@ export default function Home() {
     };
   }, []);
 
-  // ===================================
-  //         MAIN CLICK LOGIC
-  // ===================================
+  /* ============================================================
+                         CLICK LOGIC
+  ============================================================ */
   const handleMouseClick = () => {
     if (clicks < clicksToMilk) {
       playClickSound();
@@ -321,13 +346,13 @@ export default function Home() {
     resetWarningTimeout();
   };
 
-  // SPACEBAR
+  // Spacebar
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.code === 'Space') handleMouseClick();
+      if (e.code === "Space") handleMouseClick();
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   });
 
   const milked = clicks >= clicksToMilk;
@@ -335,18 +360,18 @@ export default function Home() {
 
   const mouseGlow =
     multiplier >= 2
-      ? 'drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse'
+      ? "drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse"
       : multiplier >= 1.5
-      ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]'
-      : '';
+      ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
+      : "";
 
-  // ===================================
-  //             RENDER
-  // ===================================
+  /* ============================================================
+                           RENDER
+  ============================================================ */
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
 
-      {/* SHOP */}
+      {/* SHOP BUTTON */}
       <div className="fixed top-4 right-4 z-[20]">
         <Link href="/shop">
           <Button>
@@ -373,12 +398,12 @@ export default function Home() {
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
         <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
           <CardHeader>
-            <CardTitle className="flex items-center justify-center gap-2 text-4xl font-bold tracking-tight font-headline">
+            <CardTitle className="flex items-center justify-center gap-2 text-4xl font-bold font-headline">
               <Rat className="h-8 w-8" /> Mouse Milker
             </CardTitle>
             <CardDescription>
               {milked
-                ? 'You did it!'
+                ? "You did it!"
                 : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`}
             </CardDescription>
           </CardHeader>
@@ -409,7 +434,7 @@ export default function Home() {
                   />
                 </button>
 
-                {/* COMBO BAR */}
+                {/* Combo Bar */}
                 <div className="w-40 h-2 bg-gray-300 rounded-full overflow-hidden mt-1">
                   <div
                     className="h-full bg-white transition-all"

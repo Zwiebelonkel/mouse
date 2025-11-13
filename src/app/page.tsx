@@ -163,9 +163,9 @@ export default function Home() {
     return Math.max(0.7, 1 - totalMilkedCount * 0.005);
   };
 
-  const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
-  const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
-  const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
+  const playStartSound = useSoundPool(startSounds, undefined, true);
+  const playSuccessSound = useSoundPool(successSounds, undefined, true);
+  const playWarningSound = useSoundPool(warningSounds, undefined, true);
 
   // overlapping:
   const playClickSound = useSoundPool(['/mouse/sounds/click.mp3'], undefined, false);
@@ -200,7 +200,6 @@ export default function Home() {
 
   const comboTimeWindow = 150 * (1 + (comboDecayReduction ?? 0));
   
-// === PART A1 END ===
   // =============================================================
   // MULTIPLIKATOR-LOGIK
   // =============================================================
@@ -306,6 +305,32 @@ export default function Home() {
   // =============================================================
   // ERFOLG → MILCH + EFFEKTE
   // =============================================================
+  const fireMilkConfetti = () => {
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      startVelocity: 30,
+      gravity: 0.8,
+      ticks: 180,
+      colors: ['#ffffff'],
+      shapes: ['circle'],
+      origin: { y: 0.6 },
+    });
+  };
+
+  const fireMiniMilkParticles = () => {
+    confetti({
+      particleCount: 10,
+      spread: 140,
+      startVelocity: 25,
+      gravity: 1,
+      ticks: 80,
+      colors: ['#ffffff'],
+      shapes: ['circle'],
+      origin: { y: 0.6 },
+    });
+  };
+
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
@@ -406,7 +431,6 @@ export default function Home() {
       ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]"
       : "";
 
-// === PART A2 END ===
 
   // =============================================================
   // RENDER
@@ -505,7 +529,7 @@ export default function Home() {
                 {/* PASSIVE MILK INFO */}
                 {passiveMilk > 0 && (
                   <p className="text-xs mt-2 text-muted-foreground">
-                    +{passiveMilk.toFixed(2)} / sec (passiv)
+                    +{passiveMilk.toFixed(2)/100} / sec (passiv)
                   </p>
                 )}
               </div>

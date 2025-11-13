@@ -165,10 +165,100 @@ const mod = __turbopack_context__.x("next/dist/server/app-render/work-unit-async
 
 module.exports = mod;
 }}),
-"[project]/src/data/upgrades.ts [app-ssr] (ecmascript)": (function(__turbopack_context__) {
+"[project]/src/data/upgrades.ts [app-ssr] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
 
-var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
+var { g: global, __dirname } = __turbopack_context__;
 {
+__turbopack_context__.s({
+    "upgrades": (()=>upgrades)
+});
+const upgrades = {
+    // Kategorie 1 – Stärke
+    extraFinger: {
+        name: "Extra Finger",
+        description: "+1 Klickkraft",
+        baseCost: 10,
+        maxLevel: 50,
+        effect: (state)=>({
+                clicksPerMilk: state.clicksPerMilk + 1
+            })
+    },
+    muscleTraining: {
+        name: "Muskeltraining",
+        description: "+10% Klickkraft",
+        baseCost: 30,
+        maxLevel: 20,
+        effect: (state)=>({
+                clicksPerMilk: Math.round(state.clicksPerMilk * 1.1)
+            })
+    },
+    powerGrip: {
+        name: "Power Grip",
+        description: "+25% Klickkraft",
+        baseCost: 100,
+        maxLevel: 15,
+        effect: (state)=>({
+                clicksPerMilk: Math.round(state.clicksPerMilk * 1.25)
+            })
+    },
+    // Kategorie 2 – Combo
+    comboMaster: {
+        name: "Combo Master",
+        description: "Combo decay -20%",
+        baseCost: 25,
+        maxLevel: 10,
+        effect: (state)=>({
+                comboDecayReduction: state.comboDecayReduction + 0.2
+            })
+    },
+    ultraCombo: {
+        name: "Ultra Combo",
+        description: "Max Multiplikator +0.5",
+        baseCost: 120,
+        maxLevel: 5,
+        effect: (state)=>({
+                maxMultiplierBonus: state.maxMultiplierBonus + 0.5
+            })
+    },
+    milkSurge: {
+        name: "Milk Surge",
+        description: "Start-Multiplikator +0.25",
+        baseCost: 200,
+        maxLevel: 3,
+        effect: (state)=>({
+                baseMultiplierBonus: state.baseMultiplierBonus + 0.25
+            })
+    },
+    // Kategorie 3 – Passive Milch
+    mouseFood: {
+        name: "Mausfutter",
+        description: "+1 Milch/min",
+        baseCost: 50,
+        maxLevel: 20,
+        effect: (state)=>({
+                passiveMilk: state.passiveMilk + 1
+            })
+    },
+    hamsterWheel: {
+        name: "Hamsterrad",
+        description: "+5 Milch/min",
+        baseCost: 300,
+        maxLevel: 10,
+        effect: (state)=>({
+                passiveMilk: state.passiveMilk + 5
+            })
+    },
+    milkFarm: {
+        name: "Milchfarm",
+        description: "+50 Milch/min",
+        baseCost: 1500,
+        maxLevel: 5,
+        effect: (state)=>({
+                passiveMilk: state.passiveMilk + 50
+            })
+    }
+};
 }}),
 "[project]/src/store/milk.ts [app-ssr] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
@@ -202,8 +292,8 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                 0
             ])),
         increaseMilkedCount: ()=>set((state)=>({
-                    milkedCount: state.milkedCount + 1,
-                    totalMilkedCount: state.totalMilkedCount + 1
+                    milkedCount: state.milkedCount + 1000,
+                    totalMilkedCount: state.totalMilkedCount + 1000
                 })),
         decreaseMilkedCount: (amount)=>set((state)=>({
                     milkedCount: Math.max(0, state.milkedCount - amount)
@@ -292,6 +382,7 @@ const exclusiveChannel = {
 function useSoundPool(paths, getPlaybackRate, exclusive = false) {
     const poolRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])([]);
     const loadedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    // lädt Sounddateien
     const loadAudio = ()=>{
         if (loadedRef.current) return;
         loadedRef.current = true;
@@ -301,7 +392,7 @@ function useSoundPool(paths, getPlaybackRate, exclusive = false) {
             return audio;
         });
     };
-    // Laden erst nach echter User-Interaktion (iPhone-tauglich)
+    // iPhone-kompatibles lazy loading
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const enable = ()=>{
             loadAudio();
@@ -321,13 +412,13 @@ function useSoundPool(paths, getPlaybackRate, exclusive = false) {
     }, []);
     const play = ()=>{
         if (!loadedRef.current || poolRef.current.length === 0) return;
-        const base = poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
-        const audio = base.cloneNode(true);
+        const original = poolRef.current[Math.floor(Math.random() * poolRef.current.length)];
+        const audio = original.cloneNode(true);
         if (getPlaybackRate) audio.playbackRate = getPlaybackRate();
         if (exclusive) {
             exclusiveChannel.play(audio);
         } else {
-            audio.play(); // overlapping allowed
+            audio.play();
         }
     };
     return play;
@@ -350,7 +441,6 @@ const successSounds = [
     '/mouse/sounds/sucess5.mp3',
     '/mouse/sounds/sucess6.mp3'
 ];
-// Finish → overlapping
 const finishSounds = [
     '/mouse/sounds/finish1.wav'
 ];
@@ -370,19 +460,19 @@ const warningSounds = [
 ];
 function Home() {
     // =============================================================
-    // DYNAMIC PITCH
+    // UPGRADE-WERTE aus STORE
     // =============================================================
-    const getDeepPitch = ()=>{
-        const { totalMilkedCount } = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMilkStore"].getState();
-        return Math.max(0.7, 1 - totalMilkedCount * 0.005);
-    };
+    const { milkedCount, totalMilkedCount, increaseMilkedCount, clicksPerMilk, clicksToMilk, increaseClicksToMilk, baseMultiplierBonus, maxMultiplierBonus, comboDecayReduction, passiveMilk } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMilkStore"])();
     // =============================================================
     // SOUND POOLS
     // =============================================================
-    const playStartSound = useSoundPool(startSounds, getDeepPitch, true);
-    const playSuccessSound = useSoundPool(successSounds, getDeepPitch, true);
-    const playWarningSound = useSoundPool(warningSounds, getDeepPitch, true);
-    // Overlapping allowed:
+    const getDeepPitch = ()=>{
+        return Math.max(0.7, 1 - totalMilkedCount * 0.005);
+    };
+    const playStartSound = useSoundPool(startSounds, undefined, true);
+    const playSuccessSound = useSoundPool(successSounds, undefined, true);
+    const playWarningSound = useSoundPool(warningSounds, undefined, true);
+    // overlapping:
     const playClickSound = useSoundPool([
         '/mouse/sounds/click.mp3'
     ], undefined, false);
@@ -392,7 +482,6 @@ function Home() {
     // STATE
     // =============================================================
     const [clicks, setClicks] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(0);
-    const { milkedCount, totalMilkedCount, increaseMilkedCount, clicksPerMilk, clicksToMilk, increaseClicksToMilk } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMilkStore"])();
     const [isMounted, setIsMounted] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isFlipped, setIsFlipped] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [hasMilkedThisRound, setHasMilkedThisRound] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
@@ -408,26 +497,30 @@ function Home() {
     // =============================================================
     // COMBO SYSTEM
     // =============================================================
-    const [multiplier, setMultiplier] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1);
+    const [multiplier, setMultiplier] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1 + (baseMultiplierBonus ?? 0));
     const [comboTimeout, setComboTimeout] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [comboProgress, setComboProgress] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1);
-    const comboTimeWindow = 150;
+    const comboTimeWindow = 150 * (1 + (comboDecayReduction ?? 0));
+    // =============================================================
+    // MULTIPLIKATOR-LOGIK
+    // =============================================================
     const increaseMultiplier = ()=>{
+        const maxMul = 2 + (maxMultiplierBonus ?? 0);
         setMultiplier((prev)=>{
-            if (prev >= 2) return 2;
+            if (prev >= maxMul) return maxMul;
             if (prev < 1.1) return 1.1;
             if (prev < 1.25) return 1.25;
             if (prev < 1.5) return 1.5;
-            return 2;
+            return Math.min(prev + 0.1, maxMul);
         });
         setComboProgress(1);
     };
     const resetMultiplier = ()=>{
-        setMultiplier(1);
+        setMultiplier(1 + (baseMultiplierBonus ?? 0));
         setComboProgress(0);
     };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        if (multiplier === 1) return;
+        if (multiplier <= 1 + (baseMultiplierBonus ?? 0)) return;
         const interval = setInterval(()=>{
             setComboProgress((prev)=>{
                 const next = prev - 0.02;
@@ -440,59 +533,38 @@ function Home() {
         }, comboTimeWindow / 50);
         return ()=>clearInterval(interval);
     }, [
-        multiplier
+        multiplier,
+        comboTimeWindow,
+        baseMultiplierBonus
     ]);
     // =============================================================
-    // CONFETTI EFFECTS
+    // PASSIVE INCOME (MouseFood, HamsterWheel, MilkFarm)
     // =============================================================
-    const fireMiniMilkParticles = ()=>{
-        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])({
-            particleCount: 10,
-            spread: 180,
-            startVelocity: 25,
-            gravity: 1,
-            ticks: 80,
-            colors: [
-                '#ffffff'
-            ],
-            shapes: [
-                'circle'
-            ],
-            origin: {
-                y: 0.5
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const interval = setInterval(()=>{
+            if (passiveMilk > 0) {
+                __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$milk$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMilkStore"].setState((state)=>({
+                        milkedCount: state.milkedCount + passiveMilk / 60
+                    }));
             }
-        });
-    };
-    const fireMilkConfetti = ()=>{
-        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])({
-            particleCount: 50,
-            spread: 60,
-            startVelocity: 30,
-            gravity: 0.8,
-            ticks: 180,
-            colors: [
-                '#ffffff'
-            ],
-            shapes: [
-                'circle'
-            ],
-            origin: {
-                y: 0.6
-            }
-        });
-    };
+        }, 1000);
+        return ()=>clearInterval(interval);
+    }, [
+        passiveMilk
+    ]);
     // =============================================================
-    // EFFECTS
+    // THEME MUSIC
     // =============================================================
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const audio = new Audio('/mouse/sounds/theme.mp3');
         audio.loop = true;
         audio.volume = 0.2;
-        audio.play();
-        return ()=>{
-            audio.pause();
-        };
+        audio.play().catch(()=>{});
+        return ()=>audio.pause();
     }, []);
+    // =============================================================
+    // iPHONE AUDIO UNLOCK
+    // =============================================================
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         setIsMounted(true);
         const unlock = ()=>{
@@ -511,7 +583,9 @@ function Home() {
             window.removeEventListener("mousedown", unlock);
         };
     }, []);
-    // Erfolgssound + Finishsound
+    // =============================================================
+    // ERFOLGSSOUND + FINISHSOUND
+    // =============================================================
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
             playSuccessSound(); // exklusiv
@@ -522,7 +596,45 @@ function Home() {
         clicksToMilk,
         hasMilkedThisRound
     ]);
-    // Erfolg → Milch + Effekte
+    // =============================================================
+    // ERFOLG → MILCH + EFFEKTE
+    // =============================================================
+    const fireMilkConfetti = ()=>{
+        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])({
+            particleCount: 50,
+            spread: 60,
+            startVelocity: 30,
+            gravity: 0.8,
+            ticks: 180,
+            colors: [
+                '#ffffff'
+            ],
+            shapes: [
+                'circle'
+            ],
+            origin: {
+                y: 0.6
+            }
+        });
+    };
+    const fireMiniMilkParticles = ()=>{
+        (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$canvas$2d$confetti$2f$dist$2f$confetti$2e$module$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])({
+            particleCount: 10,
+            spread: 140,
+            startVelocity: 25,
+            gravity: 1,
+            ticks: 80,
+            colors: [
+                '#ffffff'
+            ],
+            shapes: [
+                'circle'
+            ],
+            origin: {
+                y: 0.6
+            }
+        });
+    };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
             increaseMilkedCount();
@@ -556,20 +668,30 @@ function Home() {
     // =============================================================
     const handleMouseClick = ()=>{
         if (clicks < clicksToMilk) {
+            // Soft-click effect
             playClickSound();
+            // Rare mouse squeak
             if (Math.random() < 0.1) {
                 playMouseSound();
             }
+            // Combo
             if (comboTimeout) clearTimeout(comboTimeout);
             increaseMultiplier();
-            const to = setTimeout(()=>resetMultiplier(), comboTimeWindow);
-            setComboTimeout(to);
+            const timeout = setTimeout(()=>resetMultiplier(), comboTimeWindow);
+            setComboTimeout(timeout);
+            // Confetti
             fireMiniMilkParticles();
+            // Increase clicks
             setClicks((prev)=>prev + clicksPerMilk * multiplier);
+            // Flip animation
             setIsFlipped((prev)=>!prev);
+            // Reset warnings
             resetWarningTimeout();
         }
     };
+    // =============================================================
+    // RESET → NEUE RUNDE
+    // =============================================================
     const handlePlayAgain = ()=>{
         playStartSound();
         setClicks(0);
@@ -578,14 +700,18 @@ function Home() {
         resetMultiplier();
         resetWarningTimeout();
     };
-    // Spacebar
+    // =============================================================
+    // SPACEBAR SUPPORT
+    // =============================================================
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const handler = (e)=>{
             if (e.code === "Space") handleMouseClick();
         };
         window.addEventListener("keydown", handler);
         return ()=>window.removeEventListener("keydown", handler);
-    });
+    }, [
+        handleMouseClick
+    ]);
     const milked = clicks >= clicksToMilk;
     const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
     const mouseGlow = multiplier >= 2 ? "drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] animate-pulse" : multiplier >= 1.5 ? "drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]" : "";
@@ -604,22 +730,22 @@ function Home() {
                             className: "h-6 w-6"
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 395,
+                            lineNumber: 445,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 394,
+                        lineNumber: 444,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 393,
+                    lineNumber: 443,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 392,
+                lineNumber: 442,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -632,28 +758,28 @@ function Home() {
                         }
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 402,
+                        lineNumber: 452,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute inset-0 flex items-center justify-center",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             className: "text-xs font-bold text-muted-foreground",
-                            children: isMounted ? milkedCount : 0
+                            children: isMounted ? milkedCount.toFixed(0) : "0"
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 408,
+                            lineNumber: 458,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 407,
+                        lineNumber: 457,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 401,
+                lineNumber: 451,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -670,27 +796,27 @@ function Home() {
                                             className: "h-8 w-8"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 419,
+                                            lineNumber: 469,
                                             columnNumber: 15
                                         }, this),
                                         " Mouse Milker"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 418,
+                                    lineNumber: 468,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
-                                    children: milked ? "You did it!" : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount})`
+                                    children: milked ? "You did it!" : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount.toFixed(0)})`
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 421,
+                                    lineNumber: 471,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 417,
+                            lineNumber: 467,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -699,7 +825,7 @@ function Home() {
                                 className: "flex flex-col items-center gap-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "rounded-xl bg-accent p-6 shadow-inner",
+                                        className: "rounded-xl bg-accent p-6 shadow-inner animate-pulse",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "flex items-center gap-2 text-2xl font-bold text-accent-foreground",
                                             children: [
@@ -707,19 +833,19 @@ function Home() {
                                                     className: "h-6 w-6"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 433,
+                                                    lineNumber: 483,
                                                     columnNumber: 21
                                                 }, this),
                                                 " Du hast die Maus gemolken!"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 432,
+                                            lineNumber: 482,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 431,
+                                        lineNumber: 481,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -730,20 +856,20 @@ function Home() {
                                                 className: "mr-2 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 437,
+                                                lineNumber: 487,
                                                 columnNumber: 19
                                             }, this),
                                             " Erneut melken"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 436,
+                                        lineNumber: 486,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 430,
+                                lineNumber: 480,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex flex-col items-center gap-4",
@@ -755,12 +881,12 @@ function Home() {
                                             className: `h-40 w-40 transition-transform duration-200 ${isFlipped ? "scale-x-[-1]" : ""} ${mouseGlow}`
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 447,
+                                            lineNumber: 498,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 443,
+                                        lineNumber: 494,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -772,23 +898,23 @@ function Home() {
                                             }
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 456,
+                                            lineNumber: 507,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 455,
+                                        lineNumber: 506,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         className: "text-sm text-muted-foreground mt-1",
                                         children: [
-                                            multiplier.toFixed(2),
+                                            Number(multiplier || 1).toFixed(2),
                                             "× Combo"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 462,
+                                        lineNumber: 513,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -799,52 +925,64 @@ function Home() {
                                                 children: Math.floor(clicks)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 467,
+                                                lineNumber: 519,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "mt-1 text-sm text-muted-foreground",
-                                                children: clicks === 0 ? `Click the mouse ${clicksToMilk} times!` : `${clicksToMilk - clicks > 0 ? Math.round(clicksToMilk - clicks) : 0} more clicks to go!`
+                                                children: clicks === 0 ? `Click the mouse ${clicksToMilk} times!` : `${Math.max(0, Math.round(clicksToMilk - clicks))} more clicks to go!`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 470,
+                                                lineNumber: 522,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 466,
+                                        lineNumber: 518,
                                         columnNumber: 17
+                                    }, this),
+                                    passiveMilk > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-xs mt-2 text-muted-foreground",
+                                        children: [
+                                            "+",
+                                            passiveMilk.toFixed(2) / 100,
+                                            " / sec (passiv)"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/app/page.tsx",
+                                        lineNumber: 531,
+                                        columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 441,
+                                lineNumber: 491,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 428,
+                            lineNumber: 478,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 416,
+                    lineNumber: 466,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 415,
+                lineNumber: 465,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/page.tsx",
-        lineNumber: 389,
+        lineNumber: 439,
         columnNumber: 5
     }, this);
-}
+} // <--- END OF FILE
 }}),
 
 };

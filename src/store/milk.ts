@@ -56,8 +56,8 @@ export const useMilkStore = create<MilkState>()(
 
       increaseMilkedCount: () =>
         set((state) => ({
-          milkedCount: state.milkedCount + 1,
-          totalMilkedCount: state.totalMilkedCount + 1,
+          milkedCount: state.milkedCount + 1000,
+          totalMilkedCount: state.totalMilkedCount + 1000,
         })),
 
       decreaseMilkedCount: (amount) =>
@@ -70,7 +70,7 @@ export const useMilkStore = create<MilkState>()(
           clicksToMilk: Math.ceil(state.clicksToMilk * 1.15),
         })),
 
-      buyUpgrade: (id) => {
+      buyUpgrade: (id: string) => {
         const state = get();
         const upg = upgrades[id];
         const level = state.upgradeLevels[id];

@@ -170,6 +170,14 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
 }
 }}),
+"[project]/src/data/upgrades.ts [app-client] (ecmascript)": (function(__turbopack_context__) {
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module, e: exports } = __turbopack_context__;
+{
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
 "[project]/src/store/milk.ts [app-client] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
 
@@ -180,11 +188,7 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/react.mjs [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/middleware.mjs [app-client] (ecmascript)");
-(()=>{
-    const e = new Error("Cannot find module '@/data/upgrades'");
-    e.code = 'MODULE_NOT_FOUND';
-    throw e;
-})();
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/data/upgrades.ts [app-client] (ecmascript)");
 ;
 ;
 ;
@@ -201,7 +205,7 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
         passiveMilk: 0,
         lastPassiveTick: Date.now(),
         clicksToMilk: INITIAL_CLICKS_TO_MILK,
-        upgradeLevels: Object.fromEntries(Object.keys(upgrades).map((k)=>[
+        upgradeLevels: Object.fromEntries(Object.keys(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["upgrades"]).map((k)=>[
                 k,
                 0
             ])),
@@ -217,7 +221,7 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                 })),
         buyUpgrade: (id)=>{
             const state = get();
-            const upg = upgrades[id];
+            const upg = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["upgrades"][id];
             const level = state.upgradeLevels[id];
             const cost = costFormula(upg.baseCost, level);
             if (state.milkedCount < cost) return false;
@@ -3558,4 +3562,4 @@ var create = module.exports.create;
 }}),
 }]);
 
-//# sourceMappingURL=_9a7ff439._.js.map
+//# sourceMappingURL=_9124df7d._.js.map

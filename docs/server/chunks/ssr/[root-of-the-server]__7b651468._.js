@@ -165,6 +165,11 @@ const mod = __turbopack_context__.x("next/dist/server/app-render/work-unit-async
 
 module.exports = mod;
 }}),
+"[project]/src/data/upgrades.ts [app-ssr] (ecmascript)": (function(__turbopack_context__) {
+
+var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
+{
+}}),
 "[project]/src/store/milk.ts [app-ssr] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
 
@@ -175,11 +180,7 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/react.mjs [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zustand/esm/middleware.mjs [app-ssr] (ecmascript)");
-(()=>{
-    const e = new Error("Cannot find module '@/data/upgrades'");
-    e.code = 'MODULE_NOT_FOUND';
-    throw e;
-})();
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/data/upgrades.ts [app-ssr] (ecmascript)");
 ;
 ;
 ;
@@ -196,7 +197,7 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
         passiveMilk: 0,
         lastPassiveTick: Date.now(),
         clicksToMilk: INITIAL_CLICKS_TO_MILK,
-        upgradeLevels: Object.fromEntries(Object.keys(upgrades).map((k)=>[
+        upgradeLevels: Object.fromEntries(Object.keys(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["upgrades"]).map((k)=>[
                 k,
                 0
             ])),
@@ -212,7 +213,7 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                 })),
         buyUpgrade: (id)=>{
             const state = get();
-            const upg = upgrades[id];
+            const upg = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$upgrades$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["upgrades"][id];
             const level = state.upgradeLevels[id];
             const cost = costFormula(upg.baseCost, level);
             if (state.milkedCount < cost) return false;
@@ -848,4 +849,4 @@ function Home() {
 
 };
 
-//# sourceMappingURL=%5Broot-of-the-server%5D__1d309fda._.js.map
+//# sourceMappingURL=%5Broot-of-the-server%5D__7b651468._.js.map

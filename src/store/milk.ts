@@ -56,8 +56,8 @@ export const useMilkStore = create<MilkState>()(
 
       increaseMilkedCount: () =>
         set((state) => ({
-          milkedCount: state.milkedCount + 1000,
-          totalMilkedCount: state.totalMilkedCount + 1000,
+          milkedCount: state.milkedCount + 1,
+          totalMilkedCount: state.totalMilkedCount + 1,
         })),
 
       decreaseMilkedCount: (amount) =>

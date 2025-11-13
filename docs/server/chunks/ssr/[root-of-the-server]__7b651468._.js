@@ -292,8 +292,8 @@ const useMilkStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                 0
             ])),
         increaseMilkedCount: ()=>set((state)=>({
-                    milkedCount: state.milkedCount + 1000,
-                    totalMilkedCount: state.totalMilkedCount + 1000
+                    milkedCount: state.milkedCount + 1,
+                    totalMilkedCount: state.totalMilkedCount + 1
                 })),
         decreaseMilkedCount: (amount)=>set((state)=>({
                     milkedCount: Math.max(0, state.milkedCount - amount)

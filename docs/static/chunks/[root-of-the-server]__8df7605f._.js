@@ -2096,16 +2096,10 @@ const normalizePathTrailingSlash = (path)=>{
         return path;
     }
     const { pathname, query, hash } = (0, _parsepath.parsePath)(path);
-    if ("TURBOPACK compile-time truthy", 1) {
-        if (/\.[^/]+\/?$/.test(pathname)) {
-            return "" + (0, _removetrailingslash.removeTrailingSlash)(pathname) + query + hash;
-        } else if (pathname.endsWith('/')) {
-            return "" + pathname + query + hash;
-        } else {
-            return pathname + "/" + query + hash;
-        }
+    if ("TURBOPACK compile-time falsy", 0) {
+        "TURBOPACK unreachable";
     }
-    "TURBOPACK unreachable";
+    return "" + (0, _removetrailingslash.removeTrailingSlash)(pathname) + query + hash;
 };
 if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {
     Object.defineProperty(exports.default, '__esModule', {
@@ -2132,7 +2126,7 @@ Object.defineProperty(exports, "addBasePath", {
 });
 const _addpathprefix = __turbopack_context__.r("[project]/node_modules/next/dist/shared/lib/router/utils/add-path-prefix.js [client] (ecmascript)");
 const _normalizetrailingslash = __turbopack_context__.r("[project]/node_modules/next/dist/client/normalize-trailing-slash.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/mouse") || '';
 function addBasePath(path, required) {
     return (0, _normalizetrailingslash.normalizePathTrailingSlash)(("TURBOPACK compile-time falsy", 0) ? ("TURBOPACK unreachable", undefined) : (0, _addpathprefix.addPathPrefix)(path, basePath));
 }
@@ -6036,7 +6030,7 @@ Object.defineProperty(exports, "hasBasePath", {
     }
 });
 const _pathhasprefix = __turbopack_context__.r("[project]/node_modules/next/dist/shared/lib/router/utils/path-has-prefix.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/mouse") || '';
 function hasBasePath(path) {
     return (0, _pathhasprefix.pathHasPrefix)(path, basePath);
 }
@@ -6064,7 +6058,7 @@ Object.defineProperty(exports, "removeBasePath", {
     }
 });
 const _hasbasepath = __turbopack_context__.r("[project]/node_modules/next/dist/client/has-base-path.js [client] (ecmascript)");
-const basePath = ("TURBOPACK compile-time value", "") || '';
+const basePath = ("TURBOPACK compile-time value", "/mouse") || '';
 function removeBasePath(path) {
     if ("TURBOPACK compile-time falsy", 0) {
         "TURBOPACK unreachable";
@@ -6111,7 +6105,7 @@ function resolveRewrites(asPath, pages, rewrites, query, resolveHref, locales) {
     let fsPathname = (0, _removetrailingslash.removeTrailingSlash)((0, _normalizelocalepath.normalizeLocalePath)((0, _removebasepath.removeBasePath)(parsedAs.pathname), locales).pathname);
     let resolvedHref;
     const handleRewrite = (rewrite)=>{
-        const matcher = (0, _pathmatch.getPathMatch)(rewrite.source + (("TURBOPACK compile-time truthy", 1) ? '(/)?' : ("TURBOPACK unreachable", undefined)), {
+        const matcher = (0, _pathmatch.getPathMatch)(rewrite.source + (("TURBOPACK compile-time falsy", 0) ? ("TURBOPACK unreachable", undefined) : ''), {
             removeUnnamedParams: true,
             strict: true
         });
@@ -6959,7 +6953,7 @@ function getMiddlewareData(source, response, options) {
         i18n: {
             locales: options.router.locales
         },
-        trailingSlash: Boolean(("TURBOPACK compile-time value", true))
+        trailingSlash: Boolean(("TURBOPACK compile-time value", false))
     };
     const rewriteHeader = response.headers.get('x-nextjs-rewrite');
     let rewriteTarget = rewriteHeader || response.headers.get('x-nextjs-matched-path');
@@ -8336,7 +8330,7 @@ class Router {
         // if auto prerendered and dynamic route wait to update asPath
         // until after mount to prevent hydration mismatch
         const autoExportDynamic = (0, _isdynamic.isDynamicRoute)(pathname) && self.__NEXT_DATA__.autoExport;
-        this.basePath = ("TURBOPACK compile-time value", "") || '';
+        this.basePath = ("TURBOPACK compile-time value", "/mouse") || '';
         this.sub = subscription;
         this.clc = null;
         this._wrapApp = wrapApp;
@@ -12809,7 +12803,7 @@ function useOpenInEditor(param) {
         params.append('file', file);
         params.append('lineNumber', String(lineNumber));
         params.append('column', String(column));
-        self.fetch((("TURBOPACK compile-time value", "") || '') + "/__nextjs_launch-editor?" + params.toString()).then(()=>{}, (cause)=>{
+        self.fetch((("TURBOPACK compile-time value", "/mouse") || '') + "/__nextjs_launch-editor?" + params.toString()).then(()=>{}, (cause)=>{
             console.error('Failed to open file "' + file + " (" + lineNumber + ":" + column + ')" in your editor. Cause:', cause);
         });
     }, [
@@ -15162,7 +15156,7 @@ function ErrorFeedback(param) {
                 [errorCode]: wasHelpful
             }));
         try {
-            const response = await fetch((("TURBOPACK compile-time value", "") || '') + "/__nextjs_error_feedback?" + new URLSearchParams({
+            const response = await fetch((("TURBOPACK compile-time value", "/mouse") || '') + "/__nextjs_error_feedback?" + new URLSearchParams({
                 errorCode,
                 wasHelpful: wasHelpful.toString()
             }));
@@ -20957,7 +20951,7 @@ function AppContainer(param) {
                             children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_headmanagercontextsharedruntime.HeadManagerContext.Provider, {
                                 value: headManager,
                                 children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_imageconfigcontextsharedruntime.ImageConfigContext.Provider, {
-                                    value: ("TURBOPACK compile-time value", JSON.parse('{"deviceSizes":[640,750,828,1080,1200,1920,2048,3840],"imageSizes":[16,32,48,64,96,128,256,384],"path":"/_next/image/","loader":"default","dangerouslyAllowSVG":false,"unoptimized":true,"domains":[],"remotePatterns":[{"protocol":"https","hostname":"placehold.co"}],"output":"export"}')),
+                                    value: ("TURBOPACK compile-time value", JSON.parse('{"deviceSizes":[640,750,828,1080,1200,1920,2048,3840],"imageSizes":[16,32,48,64,96,128,256,384],"path":"/mouse/_next/image","loader":"default","dangerouslyAllowSVG":false,"unoptimized":true,"domains":[],"remotePatterns":[{"protocol":"https","hostname":"placehold.co","pathname":"/**"},{"protocol":"https","hostname":"images.unsplash.com","pathname":"/**"},{"protocol":"https","hostname":"picsum.photos","pathname":"/**"}],"output":"export"}')),
                                     children: children
                                 })
                             })

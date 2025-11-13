@@ -13,9 +13,9 @@ import { Rat } from 'lucide-react';
 import Link from 'next/link';
 import { useMilkStore } from '@/store/milk';
 
-const startSounds = ['/mouse/sounds/start1.mp3', '/mouse/sounds/start2.mp3'];
-const successSounds = ['/mouse/sounds/sucess.mp3', '/mouse/sounds/sucess2.mp3', '/mouse/sounds/sucess3.mp3'];
-const warningSounds = ['/mouse/sounds/warning.mp3', '/mouse/sounds/warning1.mp3', '/mouse/sounds/warning2.mp3', '/mouse/sounds/warning3.mp3', '/mouse/sounds/warning4.mp3'];
+const startSounds = ['/mouse/sounds/start1.mp3', '/mouse/sounds/start2.mp3', '/mouse/sounds/start3.mp3', '/mouse/sounds/start4.mp3'];
+const successSounds = ['/mouse/sounds/sucess.mp3', '/mouse/sounds/sucess2.mp3', '/mouse/sounds/sucess3.mp3', '/mouse/sounds/sucess4.mp3', '/mouse/sounds/sucess5.mp3', '/mouse/sounds/sucess6.mp3'];
+const warningSounds = ['/mouse/sounds/warning.mp3', '/mouse/sounds/warning1.mp3', '/mouse/sounds/warning2.mp3', '/mouse/sounds/warning3.mp3', '/mouse/sounds/warning4.mp3', '/mouse/sounds/warning5.mp3', '/mouse/sounds/warning6.mp3', '/mouse/sounds/warning7.mp3', '/mouse/sounds/warning8.mp3'];
 
 export default function Home() {
   const [clicks, setClicks] = useState(0);

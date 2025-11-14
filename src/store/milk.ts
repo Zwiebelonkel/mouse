@@ -16,6 +16,8 @@ export interface MilkState {
 
   clicksPerMilk: number;
 
+  autoClick: number;
+
   comboDecayReduction: number;
   maxMultiplierBonus: number;
   baseMultiplierBonus: number;
@@ -44,6 +46,8 @@ export const useMilkStore = create<MilkState>()(
       totalMilkedCount: 0,
 
       clicksPerMilk: 1,
+
+      autoClick: 0,
 
       comboDecayReduction: 0,
       maxMultiplierBonus: 0,

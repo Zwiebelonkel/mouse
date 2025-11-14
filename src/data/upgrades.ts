@@ -10,6 +10,7 @@ import {
   Mouse,
   Cog,
   Home,
+  RefreshCcw
 } from "lucide-react";
 
 export const upgrades = {
@@ -44,6 +45,17 @@ export const upgrades = {
     icon: Grab,
     effect: (state) => ({
       clicksPerMilk: Math.round(state.clicksPerMilk * 1.25),
+    }),
+  },
+
+  milkMaschine: {
+    name: "Milchmschine",
+    description: "+ 0.2 Click / Sekunde",
+    baseCost: 1,
+    maxLevel: 50,
+    icon: RefreshCcw,
+    effect: (state) => ({
+      autoClick: state.autoClick + 0.75,
     }),
   },
 

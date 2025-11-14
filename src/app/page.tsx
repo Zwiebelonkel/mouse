@@ -151,6 +151,7 @@ export default function Home() {
     increaseMilkedCount,
     clicksPerMilk,
     clicksToMilk,
+    autoClick,
     increaseClicksToMilk,
     baseMultiplierBonus,
     maxMultiplierBonus,
@@ -403,6 +404,22 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (autoClick > 0) {
+      // Bestimme die Zeit zwischen den Klicks, je nach `autoClick` (max. 200ms für sehr schnelle Klicks)
+      const intervalTime = Math.max(10, 1000 / (autoClick)); // Intervall nicht kürzer als 200ms
+  
+      const interval = setInterval(() => {
+        handleMouseClick();  // Simuliert einen Klick
+      }, intervalTime);
+  
+      // Aufräumen der Intervallfunktion, wenn der Auto-Click deaktiviert wird
+      return () => clearInterval(interval);
+    }
+  }, [autoClick, handleMouseClick]);
+  
+
+
   // =============================================================
   // RESET → NEUE RUNDE
   // =============================================================
@@ -464,7 +481,7 @@ export default function Home() {
 
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-xs font-bold text-black">
-            {isMounted ? milkedCount.toFixed(0) : "0"}
+            {isMounted ? (milkedCount || 0).toFixed(0) : "0"}
           </span>
         </div>
       </div>

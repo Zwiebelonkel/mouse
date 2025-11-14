@@ -474,7 +474,7 @@ export default function Home() {
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
       {/* TOP-LEFT BUTTON */}
-      <div className="fixed top-4 left-4 z-[20] flex flex-col gap-2">
+      <div className="fixed top-4 left-4 z-[20] flex flex-row gap-2">
         <AudioToggle />
         <Link href="/stats">
           <Button>

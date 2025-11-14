@@ -441,9 +441,13 @@ export default function Home() {
   // =============================================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
-      {/* TOP-RIGHT BUTTONS */}
-      <div className="fixed top-4 right-4 z-[20] flex items-center gap-2">
+      {/* TOP-LEFT BUTTON */}
+      <div className="fixed top-4 left-4 z-[20]">
         <AudioToggle />
+      </div>
+
+      {/* TOP-RIGHT BUTTON */}
+      <div className="fixed top-4 right-4 z-[20]">
         <Link href="/shop">
           <Button>
             <ShoppingCart className="h-6 w-6" />

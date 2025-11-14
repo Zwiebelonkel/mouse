@@ -50,7 +50,7 @@ export const upgrades = {
 
   milkMaschine: {
     name: "Milchmschine",
-    description: "+ 0.2 Click / Sekunde",
+    description: "+ 0.75 Click / Minute",
     baseCost: 1,
     maxLevel: 100,
     icon: RefreshCcw,

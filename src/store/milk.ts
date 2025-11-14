@@ -26,6 +26,7 @@ export interface MilkState {
   clicksToMilk: number;
 
   upgradeLevels: Record<string, number>;
+  isMuted: boolean;
 
   increaseMilkedCount: () => void;
   decreaseMilkedCount: (amount: number) => void;
@@ -33,6 +34,7 @@ export interface MilkState {
   increaseClicksToMilk: () => void;
 
   buyUpgrade: (id: string) => boolean;
+  toggleMute: () => void;
 }
 
 export const useMilkStore = create<MilkState>()(
@@ -55,6 +57,7 @@ export const useMilkStore = create<MilkState>()(
       upgradeLevels: Object.fromEntries(
         Object.keys(upgrades).map((k) => [k, 0])
       ),
+      isMuted: false,
 
       increaseMilkedCount: () =>
         set((state) => ({
@@ -92,6 +95,7 @@ export const useMilkStore = create<MilkState>()(
 
         return true;
       },
+      toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
     }),
     {
       name: "milk-storage",

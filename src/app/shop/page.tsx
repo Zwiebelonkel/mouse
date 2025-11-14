@@ -12,7 +12,7 @@ export default function ShopPage() {
 
   return (
     <main className="min-h-screen bg-background font-body p-6 sm:p-8 md:p-12">
-      <div className="fixed top-6 right-6 z-10 flex items-center gap-4">
+      <div className="fixed bottom-6 right-6 z-10 flex items-center gap-4">
         <div className="flex items-center gap-2 rounded-xl bg-secondary p-3 font-bold shadow-inner text-lg">
           <Milk className="h-6 w-6" />
           <span>{milkedCount}</span>

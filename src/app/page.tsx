@@ -476,6 +476,11 @@ export default function Home() {
       {/* TOP-LEFT BUTTON */}
       <div className="fixed top-4 left-4 z-[20]">
         <AudioToggle />
+        <Link href="/stats">
+          <Button>
+            <ShoppingCart className="h-6 w-6" />
+          </Button>
+        </Link>
       </div>
 
       {/* TOP-RIGHT BUTTON */}

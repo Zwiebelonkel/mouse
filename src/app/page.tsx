@@ -129,6 +129,8 @@ const successSounds = [
   "/mouse/sounds/sucess6.mp3",
   "/mouse/sounds/sucess7.mp3",
   "/mouse/sounds/sucess8.mp3",
+  "/mouse/sounds/sucess10.mp3",
+
 
 ];
 
@@ -147,6 +149,8 @@ const warningSounds = [
   "/mouse/sounds/warning8.mp3",
   "/mouse/sounds/warning9.mp3",
   "/mouse/sounds/warning10.mp3",
+  "/mouse/sounds/warning11.mp3",
+
 ];
 
 export default function Home() {

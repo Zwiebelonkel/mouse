@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Rat, ShoppingCart, RefreshCcw, Milk } from "lucide-react";
+import { Rat, ShoppingCart, RefreshCcw, Milk, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { useMilkStore } from "@/store/milk";
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
@@ -575,8 +575,14 @@ export default function Home() {
   // =============================================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
-      <div className="fixed top-4 left-4 z-[20]">
+      {/* TOP-LEFT BUTTON */}
+      <div className="fixed top-4 left-4 z-[20] flex flex-col gap-2">
         <AudioToggle />
+        <Link href="/stats">
+          <Button>
+            <BarChart3 className="h-6 w-6" />
+          </Button>
+        </Link>
       </div>
 
       <div className="fixed top-4 right-4 z-[20]">

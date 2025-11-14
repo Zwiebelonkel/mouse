@@ -1,3 +1,17 @@
+'use client';
+
+import {
+  Hand,
+  Dumbbell,
+  Grab,
+  Gauge,
+  GaugeCircle,
+  Activity,
+  Mouse,
+  Cog,
+  Home,
+} from "lucide-react";
+
 export const upgrades = {
   // Kategorie 1 – Stärke
   extraFinger: {
@@ -5,6 +19,7 @@ export const upgrades = {
     description: "+1 Klickkraft",
     baseCost: 5,
     maxLevel: 50,
+    icon: Hand,
     effect: (state) => ({
       clicksPerMilk: state.clicksPerMilk + 1,
     }),
@@ -15,6 +30,7 @@ export const upgrades = {
     description: "+10% Klickkraft",
     baseCost: 10,
     maxLevel: 20,
+    icon: Dumbbell,
     effect: (state) => ({
       clicksPerMilk: Math.round(state.clicksPerMilk * 1.1),
     }),
@@ -25,6 +41,7 @@ export const upgrades = {
     description: "+25% Klickkraft",
     baseCost: 20,
     maxLevel: 15,
+    icon: Grab,
     effect: (state) => ({
       clicksPerMilk: Math.round(state.clicksPerMilk * 1.25),
     }),
@@ -36,6 +53,7 @@ export const upgrades = {
     description: "Combo decay -20%",
     baseCost: 15,
     maxLevel: 10,
+    icon: Gauge,
     effect: (state) => ({
       comboDecayReduction: state.comboDecayReduction + 0.2,
     }),
@@ -46,6 +64,7 @@ export const upgrades = {
     description: "Max Multiplikator +0.5",
     baseCost: 18,
     maxLevel: 5,
+    icon: GaugeCircle,
     effect: (state) => ({
       maxMultiplierBonus: state.maxMultiplierBonus + 0.5,
     }),
@@ -56,6 +75,7 @@ export const upgrades = {
     description: "Start-Multiplikator +0.25",
     baseCost: 200,
     maxLevel: 3,
+    icon: Activity,
     effect: (state) => ({
       baseMultiplierBonus: state.baseMultiplierBonus + 0.25,
     }),
@@ -67,6 +87,7 @@ export const upgrades = {
     description: "+1 Milch/min",
     baseCost: 10,
     maxLevel: 20,
+    icon: Mouse,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 1,
     }),
@@ -77,6 +98,7 @@ export const upgrades = {
     description: "+5 Milch/min",
     baseCost: 20,
     maxLevel: 10,
+    icon: Cog,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 5,
     }),
@@ -87,6 +109,7 @@ export const upgrades = {
     description: "+50 Milch/min",
     baseCost: 150,
     maxLevel: 5,
+    icon: Home,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 50,
     }),

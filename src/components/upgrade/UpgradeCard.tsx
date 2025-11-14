@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
 import { Button } from "@/components/ui/button";
 import { useMilkStore } from "@/store/milk";
 import { upgrades } from "@/data/upgrades";
 import { useState } from "react";
 
-export default function UpgradeCard({ id }) {
-  const upg = upgrades[id];
-  const {
-    milkedCount,
-    upgradeLevels,
-    buyUpgrade,
-  } = useMilkStore();
+interface UpgradeCardProps {
+  id: string;
+}
 
-  const level = upgradeLevels[id];
+export default function UpgradeCard({ id }: UpgradeCardProps) {
+  const upg = upgrades[id];
+  const { milkedCount, upgradeLevels, buyUpgrade } = useMilkStore();
+
+  const level = upgradeLevels[id] || 0;
   const cost = Math.floor(upg.baseCost * Math.pow(1.65, level));
   const canBuy = milkedCount >= cost && level < upg.maxLevel;
 
@@ -26,48 +26,53 @@ export default function UpgradeCard({ id }) {
     }
   };
 
+  const Icon = upg.icon;
+
   return (
     <div
-      className={`p-4 rounded-xl border bg-secondary/20 shadow-md transition ${
+      className={`flex flex-col p-4 rounded-xl border bg-secondary/20 shadow-md transition-transform duration-200 ease-in-out hover:scale-105 ${
         flash ? "bg-accent/30 scale-[1.02]" : ""
       }`}
     >
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-lg">{upg.name}</h3>
-        <span className="text-xs px-2 py-1 bg-accent rounded-full">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center gap-3">
+          <Icon className="h-8 w-8 text-accent" />
+          <h3 className="font-bold text-lg">{upg.name}</h3>
+        </div>
+        <span className="text-xs px-2 py-1 bg-accent text-accent-foreground rounded-full">
           Lv. {level}/{upg.maxLevel}
         </span>
       </div>
 
-      <p className="text-sm text-muted-foreground mt-1">
-        {upg.description}
-      </p>
+      <p className="text-sm text-muted-foreground flex-grow ml-11">{upg.description}</p>
 
-      <p className="mt-2 text-sm">
-        Kosten: <strong>{cost} 🥛</strong>
-      </p>
-
-      <Button
-        onClick={handleBuy}
-        disabled={!canBuy}
-        className={`w-full mt-3 ${
-          canBuy
-            ? "bg-accent text-accent-foreground hover:bg-accent/80"
-            : "bg-destructive/40 cursor-not-allowed"
-        }`}
-      >
-        Upgrade kaufen
-      </Button>
-
-      {!canBuy && level < upg.maxLevel && (
-        <p className="text-xs text-destructive mt-1">
-          Es fehlen {cost - milkedCount} 🥛
+      <div className="mt-4">
+        <p className="text-sm mb-2">
+          Kosten: <strong>{cost} 🥛</strong>
         </p>
-      )}
 
-      {level >= upg.maxLevel && (
-        <p className="text-xs text-green-600 mt-1">MAX LEVEL erreicht</p>
-      )}
+        <Button
+          onClick={handleBuy}
+          disabled={!canBuy}
+          className={`w-full transition-colors duration-200 ${
+            canBuy
+              ? "bg-accent text-accent-foreground hover:bg-accent/80"
+              : "bg-destructive/40 cursor-not-allowed"
+          }`}
+        >
+          Kaufen
+        </Button>
+
+        {!canBuy && level < upg.maxLevel && (
+          <p className="text-xs text-center text-destructive mt-1">
+            Dir fehlen {cost - milkedCount} 🥛
+          </p>
+        )}
+
+        {level >= upg.maxLevel && (
+          <p className="text-xs text-center text-green-600 mt-1">MAX LEVEL</p>
+        )}
+      </div>
     </div>
   );
 }

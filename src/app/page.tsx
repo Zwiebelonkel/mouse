@@ -9,12 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Rat, ShoppingCart, RefreshCcw, Milk, LucideIcon as Icon } from "lucide-react";
+import { Rat, ShoppingCart, RefreshCcw, Milk } from "lucide-react";
 import Link from "next/link";
 import { useMilkStore } from "@/store/milk";
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 import AudioToggle from "@/components/AudioToggle";
-import { BOSSES, BossDefinition } from "@/bosses/bosses";
+import { BOSSES } from "@/bosses/bosses";
 
 // =============================================================
 // iPHONE AUDIO UNLOCK
@@ -56,7 +56,6 @@ function useSoundPool(
   const poolRef = useRef<HTMLAudioElement[]>([]);
   const loadedRef = useRef(false);
 
-  // lädt Sounddateien
   const loadAudio = () => {
     if (loadedRef.current) return;
     loadedRef.current = true;
@@ -68,7 +67,6 @@ function useSoundPool(
     });
   };
 
-  // iPhone-kompatibles lazy loading
   useEffect(() => {
     const enable = () => {
       loadAudio();
@@ -117,7 +115,6 @@ const startSounds = [
   "/mouse/sounds/start5.mp3",
   "/mouse/sounds/start6.mp3",
   "/mouse/sounds/start7.mp3",
-
 ];
 
 const successSounds = [
@@ -130,13 +127,11 @@ const successSounds = [
   "/mouse/sounds/sucess7.mp3",
   "/mouse/sounds/sucess8.mp3",
   "/mouse/sounds/sucess10.mp3",
-
-
 ];
 
 const finishSounds = ["/mouse/sounds/finish1.wav"];
 const mouseSound = ["/mouse/sounds/mouse.wav"];
-const bossClickSounds = ["/mouse/sounds/warning.mp3", "/mouse/sounds/warning1.mp3"]; // Distinct boss click sound
+const bossClickSounds = ["/mouse/sounds/warning.mp3", "/mouse/sounds/warning1.mp3"];
 
 const warningSounds = [
   "/mouse/sounds/warning.mp3",
@@ -151,14 +146,11 @@ const warningSounds = [
   "/mouse/sounds/warning9.mp3",
   "/mouse/sounds/warning10.mp3",
   "/mouse/sounds/warning11.mp3",
-
 ];
 
 export default function Home() {
   const [bossTimer, setBossTimer] = useState(0);
-  // =============================================================
-  // UPGRADE-WERTE aus STORE
-  // =============================================================
+  
   const {
     milkedCount,
     totalMilkedCount,
@@ -179,15 +171,12 @@ export default function Home() {
     activateBoss,
     increaseBossClicks,
     resetBoss,
+    resetBossCounter,
   } = useMilkStore();
 
   // =============================================================
   // SOUND POOLS
   // =============================================================
-  const getDeepPitch = () => {
-    return Math.max(0.7, 1 - totalMilkedCount * 0.005);
-  };
-
   const playStartSound = useSoundPool(startSounds, undefined, true);
   const playSuccessSound = useSoundPool(successSounds, undefined, true);
   const playWarningSound = useSoundPool(warningSounds, undefined, true);
@@ -196,9 +185,8 @@ export default function Home() {
     undefined,
     true
   );
-  const playBossClickSound = useSoundPool(bossClickSounds, undefined, false); // Boss click sound
+  const playBossClickSound = useSoundPool(bossClickSounds, undefined, false);
 
-  // overlapping:
   const playClickSound = useSoundPool(["/mouse/sounds/click.mp3"], undefined, false);
   const playFinishSound = useSoundPool(finishSounds, undefined, false);
   const playMouseSound = useSoundPool(mouseSound, undefined, false);
@@ -211,7 +199,6 @@ export default function Home() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [hasMilkedThisRound, setHasMilkedThisRound] = useState(false);
   const [displayedBossTimer, setDisplayedBossTimer] = useState(0);
-
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -233,17 +220,14 @@ export default function Home() {
 
   const comboTimeWindow = 150 * (1 + (comboDecayReduction ?? 0));
 
-  // =============================================================
-  // MULTIPLIKATOR-LOGIK
-  // =============================================================
   const increaseMultiplier = () => {
     const maxMul = 2 + (maxMultiplierBonus ?? 0);
 
     setMultiplier((prev) => {
       if (prev >= maxMul) {
         triggerShake();
-        return maxMul
-      };
+        return maxMul;
+      }
       if (prev < 1.1) return 1.1;
       if (prev < 1.25) return 1.25;
       if (prev < 1.5) return 1.5;
@@ -276,7 +260,7 @@ export default function Home() {
   }, [multiplier, comboTimeWindow, baseMultiplierBonus]);
 
   // =============================================================
-  // PASSIVE INCOME (MouseFood, HamsterWheel, MilkFarm)
+  // PASSIVE INCOME
   // =============================================================
   useEffect(() => {
     const interval = setInterval(() => {
@@ -341,13 +325,13 @@ export default function Home() {
   // =============================================================
   useEffect(() => {
     if (clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound && !activeBoss) {
-      playSuccessSound(); // exklusiv
-      playFinishSound(); // overlapping
+      playSuccessSound();
+      playFinishSound();
     }
   }, [clicks, clicksToMilk, hasMilkedThisRound, activeBoss]);
 
   // =============================================================
-  // ERFOLG → MILCH + EFFEKTE
+  // CONFETTI
   // =============================================================
   const fireMilkConfetti = () => {
     confetti({
@@ -398,34 +382,26 @@ export default function Home() {
   // =============================================================
   const handleMouseClick = () => {
     if (activeBoss) {
-      // Logic for boss clicking
       handleBossClick();
     } else if (clicks < clicksToMilk) {
-      // Soft-click effect
       playClickSound();
 
-      // Rare mouse squeak
       if (Math.random() < 0.1) {
         playMouseSound();
       }
 
-      // Combo
       if (comboTimeout) clearTimeout(comboTimeout);
       increaseMultiplier();
 
       const timeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
       setComboTimeout(timeout);
 
-      // Confetti
       fireMiniMilkParticles();
 
-      // Increase clicks
       setClicks((prev) => prev + clicksPerMilk * multiplier);
 
-      // Flip animation
       setIsFlipped((prev) => !prev);
 
-      // Reset warnings
       resetWarningTimeout();
     }
   };
@@ -433,25 +409,37 @@ export default function Home() {
   const handleBossClick = () => {
     if (!activeBoss) return;
 
-    playBossClickSound(); // Play distinct boss click sound
-    increaseBossClicks(clicksPerMilk * multiplier);
+    playBossClickSound();
+    
+    // ✅ Combo-Logik auch beim Boss!
+    if (comboTimeout) clearTimeout(comboTimeout);
+    increaseMultiplier();
+    const timeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
+    setComboTimeout(timeout);
 
-    if (bossClicks + clicksPerMilk * multiplier >= activeBoss.hp) {
-      // Boss defeated
+    // ✅ Erst den aktuellen Damage berechnen
+    const damage = clicksPerMilk * multiplier;
+    const newBossClicks = bossClicks + damage;
+    
+    // ✅ Dann im Store updaten
+    increaseBossClicks(damage);
+
+    // ✅ DANN checken ob Boss tot ist (mit dem NEUEN Wert!)
+    if (newBossClicks >= activeBoss.hp) {
       useMilkStore.setState(state => ({
         milkedCount: state.milkedCount + activeBoss.rewardMultiplier * 10
       }));
 
+      fireMilkConfetti();
+      playSuccessSound();
       resetBoss();
-      document.documentElement.style.cursor = 'default'; // Reset cursor
+      document.documentElement.style.cursor = 'default';
     }
   };
 
-
   useEffect(() => {
     if (autoClick > 0) {
-      // Bestimme die Zeit zwischen den Klicks, je nach `autoClick` (max. 200ms für sehr schnelle Klicks)
-      const intervalTime = Math.max(10, 1000 / (autoClick));
+      const intervalTime = Math.max(10, 1000 / autoClick);
   
       const interval = setInterval(() => {
         if (activeBoss) {
@@ -461,40 +449,31 @@ export default function Home() {
         }
       }, intervalTime);
   
-      // Aufräumen der Intervallfunktion, wenn der Auto-Click deaktiviert wird
       return () => clearInterval(interval);
     }
-  }, [autoClick, handleMouseClick, handleBossClick, activeBoss]);
-  
+  }, [autoClick, activeBoss, handleBossClick, handleMouseClick]);
 
+  // =============================================================
+  // MILCH-ERFOLG (erhöht nur Counter) - NUR EINMAL!
+  // =============================================================
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
-  
-      increaseMilkedCount();
-     // increaseBossCounter()
-      console.log(useMilkStore.getState());
+      increaseMilkedCount(); // ✅ Das erhöht bereits den bossCounter im Store!
+      // increaseBossCounter(); ❌ NICHT nochmal aufrufen!
       playStartSound();
       playSuccessSound();
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();
-  
-      const { bossCounter, resetBossCounter } = useMilkStore.getState(); // Destructure resetBossCounter
-  
-      // --- Boss Check ---
-      if (bossCounter >= 10) {
-        const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
-        activateBoss(randomBoss);
-        playBossSound();
-        resetBossCounter(); // Reset boss counter after boss appears
-      }
     }
-  }, [clicks, clicksToMilk, hasMilkedThisRound, activeBoss, activateBoss, increaseMilkedCount, playBossSound, triggerShake]);
+  }, [clicks, clicksToMilk, hasMilkedThisRound, activeBoss]);
 
+  // =============================================================
+  // BOSS TIMER
+  // =============================================================
   useEffect(() => {
     let timerInterval: NodeJS.Timeout | null = null;
     if (activeBoss) {
-      // Set initial timer for the boss (e.g., 30 seconds)
       setBossTimer(activeBoss.time);
       setDisplayedBossTimer(activeBoss.time);
 
@@ -504,8 +483,8 @@ export default function Home() {
           setDisplayedBossTimer(nextTime);
           if (nextTime <= 0) {
             clearInterval(timerInterval!);
-            resetBoss(); // Deactivate boss when timer runs out
-            document.documentElement.style.cursor = 'default'; // Reset cursor
+            resetBoss();
+            document.documentElement.style.cursor = 'default';
             return 0;
           }
           return nextTime;
@@ -532,25 +511,36 @@ export default function Home() {
     } else {
       document.documentElement.style.cursor = 'default';
     }
-    // Cleanup function to reset cursor when component unmounts or activeBoss changes
     return () => {
       document.documentElement.style.cursor = 'default';
     };
   }, [activeBoss]);
 
-
   // =============================================================
-  // RESET → NEUE RUNDE
+  // RESET → NEUE RUNDE (mit Boss-Check!)
   // =============================================================
   const handlePlayAgain = () => {
+    // ✅ HIER passiert der Boss-Check!
+    const currentBossCounter = useMilkStore.getState().bossCounter;
+    
+    if (currentBossCounter >= 10) {
+      // Boss spawnen!
+      const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+      activateBoss(randomBoss);
+      playBossSound();
+      resetBossCounter();
+    }
+
     playStartSound();
     setClicks(0);
     setHasMilkedThisRound(false);
     increaseClicksToMilk();
     resetMultiplier();
     resetWarningTimeout();
-    resetBoss();
-    document.documentElement.style.cursor = 'default'; // Reset cursor
+    
+    if (!activeBoss) {
+      document.documentElement.style.cursor = 'default';
+    }
   };
 
   // =============================================================
@@ -568,7 +558,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleMouseClick, handleBossClick, activeBoss]);
+  }, [activeBoss, handleBossClick, handleMouseClick]);
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
@@ -585,12 +575,10 @@ export default function Home() {
   // =============================================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">
-      {/* TOP-LEFT BUTTON */}
       <div className="fixed top-4 left-4 z-[20]">
         <AudioToggle />
       </div>
 
-      {/* TOP-RIGHT BUTTON */}
       <div className="fixed top-4 right-4 z-[20]">
         <Link href="/shop">
           <Button>
@@ -599,7 +587,6 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* MILK CONTAINER */}
       <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
         <div
           className="bg-white transition-all duration-500 ease-in-out"
@@ -613,7 +600,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* GAME AREA */}
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
         <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
           <CardHeader>
@@ -621,16 +607,20 @@ export default function Home() {
               <Rat className="h-8 w-8" /> Mouse Milker
             </CardTitle>
             <CardDescription>
-              {milked
-                ? "You did it!"
-                : `Bitte melken Sie die Maus (Mäuse gemolken: ${totalMilkedCount.toFixed(
-                    0
-                  )})`}
+              {activeBoss ? (
+                <span className="text-red-500 font-bold animate-pulse">
+                  🔥 Boss: {activeBoss.name} 🔥
+                </span>
+              ) : milked ? (
+                "You did it!"
+              ) : (
+                `Bitte melken Sie die Maus (${bossCounter}/10 bis Boss)`
+              )}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="flex flex-col items-center justify-center p-6">
-            {milked ? (
+            {milked && !activeBoss ? (
               <div className="flex flex-col items-center gap-6">
                 <div className="rounded-xl bg-accent p-6 shadow-inner animate-pulse">
                   <p className="flex items-center gap-2 text-2xl font-bold text-accent-foreground">
@@ -638,14 +628,14 @@ export default function Home() {
                   </p>
                 </div>
                 <Button onClick={handlePlayAgain} size="lg">
-                  <RefreshCcw className="mr-2 h-4 w-4" /> Erneut melken
+                  <RefreshCcw className="mr-2 h-4 w-4" /> 
+                  {bossCounter >= 10 ? "Boss bekämpfen! ⚔️" : "Erneut melken"}
                 </Button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
-                {/* Mouse Icon - This will now also serve for Boss when active */}
                 <button
-                  onMouseDown={handleMouseClick} // Now calls handleMouseClick which internally decides boss or normal
+                  onMouseDown={handleMouseClick}
                   className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
                 >
                   <Rat
@@ -656,27 +646,29 @@ export default function Home() {
                   />
                 </button>
 
-                {/* Boss HP bar, shown only if activeBoss */}
                 {activeBoss && (
                   <>
+                    <p className="text-xl font-bold" style={{ color: activeBoss.color }}>
+                      {activeBoss.name}
+                    </p>
                     <div className="w-40 h-3 bg-black/30 rounded-full overflow-hidden">
                       <div
                         className="h-full transition-all"
                         style={{
-                          width: `${(bossClicks / activeBoss.hp) * 100}%`,
+                          width: `${Math.min((bossClicks / activeBoss.hp) * 100, 100)}%`,
                           backgroundColor: activeBoss.color
                         }}
                       ></div>
                     </div>
-                     {/* Timer */}
+                    <p className="text-sm text-muted-foreground">
+                      {Math.floor(bossClicks)} / {activeBoss.hp} HP
+                    </p>
                     <p className="text-lg font-bold text-red-500">
                       ⏳ {displayedBossTimer.toFixed(1)}s
                     </p>
                   </>
                 )}
 
-
-                {/* COMBO BAR */}
                 <div className="w-40 h-2 bg-accent/20 rounded-full overflow-hidden mt-1">
                   <div
                     className="h-full bg-accent transition-all"
@@ -688,22 +680,22 @@ export default function Home() {
                   {Number(multiplier || 1).toFixed(2)}× Combo
                 </p>
 
-                {/* CLICK COUNSELOR */}
-                <div className="text-center">
-                  <p className="text-5xl font-bold text-foreground">
-                    {Math.floor(clicks)}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {clicks === 0
-                      ? `Click the mouse ${clicksToMilk} times!`
-                      : `${Math.max(
-                          0,
-                          Math.round(clicksToMilk - clicks)
-                        )} more clicks to go!`}
-                  </p>
-                </div>
+                {!activeBoss && (
+                  <div className="text-center">
+                    <p className="text-5xl font-bold text-foreground">
+                      {Math.floor(clicks)}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {clicks === 0
+                        ? `Click the mouse ${clicksToMilk} times!`
+                        : `${Math.max(
+                            0,
+                            Math.round(clicksToMilk - clicks)
+                          )} more clicks to go!`}
+                    </p>
+                  </div>
+                )}
 
-                {/* PASSIVE MILK INFO */}
                 {passiveMilk > 0 && (
                   <p className="text-xs mt-2 text-muted-foreground">
                     +{(passiveMilk / 60).toFixed(2)} / sec (passiv)

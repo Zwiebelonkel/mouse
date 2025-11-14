@@ -37,6 +37,7 @@ export interface MilkState {
   activeBoss: BossDefinition | null;
   bossClicks: number;
   bossTimer: number;
+  spawnBoss: () => void; // ✅ Das fehlt!
 
   increaseMilkedCount: () => void;
   decreaseMilkedCount: (amount: number) => void;

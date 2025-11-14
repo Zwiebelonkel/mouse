@@ -52,7 +52,7 @@ export const upgrades = {
     name: "Milchmschine",
     description: "+ 0.2 Click / Sekunde",
     baseCost: 1,
-    maxLevel: 50,
+    maxLevel: 100,
     icon: RefreshCcw,
     effect: (state) => ({
       autoClick: state.autoClick + 0.75,
@@ -75,7 +75,7 @@ export const upgrades = {
     name: "Ultra Combo",
     description: "Max Multiplikator +0.5",
     baseCost: 18,
-    maxLevel: 5,
+    maxLevel: 10,
     icon: GaugeCircle,
     effect: (state) => ({
       maxMultiplierBonus: state.maxMultiplierBonus + 0.5,
@@ -120,7 +120,7 @@ export const upgrades = {
     name: "Milchfarm",
     description: "+50 Milch/min",
     baseCost: 150,
-    maxLevel: 5,
+    maxLevel: 10,
     icon: Home,
     effect: (state) => ({
       passiveMilk: state.passiveMilk + 50,

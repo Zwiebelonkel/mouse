@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { ArrowLeft, BarChart3, KeyRound, Milk } from 'lucide-react';
 
-const SECRET_CODE = '5739';
+const SECRET_CODE = '1906';
 const SECRET_REWARD = 1_000_000;
 
 export default function StatsPage() {

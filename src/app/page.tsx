@@ -223,7 +223,10 @@ export default function Home() {
     const maxMul = 2 + (maxMultiplierBonus ?? 0);
 
     setMultiplier((prev) => {
-      if (prev >= maxMul) return maxMul;
+      if (prev >= maxMul) {
+        triggerShake();
+        return maxMul
+      };
       if (prev < 1.1) return 1.1;
       if (prev < 1.25) return 1.25;
       if (prev < 1.5) return 1.5;

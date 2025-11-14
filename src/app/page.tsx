@@ -115,6 +115,9 @@ const startSounds = [
   "/mouse/sounds/start3.mp3",
   "/mouse/sounds/start4.mp3",
   "/mouse/sounds/start5.mp3",
+  "/mouse/sounds/start6.mp3",
+  "/mouse/sounds/start7.mp3",
+
 ];
 
 const successSounds = [
@@ -124,6 +127,9 @@ const successSounds = [
   "/mouse/sounds/sucess4.mp3",
   "/mouse/sounds/sucess5.mp3",
   "/mouse/sounds/sucess6.mp3",
+  "/mouse/sounds/sucess7.mp3",
+  "/mouse/sounds/sucess8.mp3",
+
 ];
 
 const finishSounds = ["/mouse/sounds/finish1.wav"];
@@ -139,6 +145,8 @@ const warningSounds = [
   "/mouse/sounds/warning6.mp3",
   "/mouse/sounds/warning7.mp3",
   "/mouse/sounds/warning8.mp3",
+  "/mouse/sounds/warning9.mp3",
+  "/mouse/sounds/warning10.mp3",
 ];
 
 export default function Home() {

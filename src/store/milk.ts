@@ -2,7 +2,9 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { upgrades } from "@/data/upgrades";
+import { upgrades } from "@/data/upgrades"; // Import BossDefinition
+import { BossDefinition, BOSSES } from "@/bosses/bosses"; // Import BossDefinition
+
 
 // Kostenformel
 const costFormula = (base: number, level: number) =>
@@ -30,6 +32,12 @@ export interface MilkState {
   upgradeLevels: Record<string, number>;
   isMuted: boolean;
 
+  // Boss-related state
+  bossCounter: number;
+  activeBoss: BossDefinition | null;
+  bossClicks: number;
+  bossTimer: number;
+
   increaseMilkedCount: () => void;
   decreaseMilkedCount: (amount: number) => void;
 
@@ -37,6 +45,13 @@ export interface MilkState {
 
   buyUpgrade: (id: string) => boolean;
   toggleMute: () => void;
+
+  // Boss-related actions
+  increaseBossCounter: () => void;
+  activateBoss: (boss: BossDefinition) => void;
+  increaseBossClicks: (amount: number) => void;
+  resetBoss: () => void;
+  resetBossCounter: () => void; // Added this line
 }
 
 export const useMilkStore = create<MilkState>()(
@@ -63,11 +78,19 @@ export const useMilkStore = create<MilkState>()(
       ),
       isMuted: false,
 
+      // Boss-related initial state
+      bossCounter: 0,
+      activeBoss: null,
+      bossClicks: 0,
+      bossTimer: 0,
+
       increaseMilkedCount: () =>
         set((state) => ({
           milkedCount: state.milkedCount + 1,
           totalMilkedCount: state.totalMilkedCount + 1,
+          bossCounter: state.activeBoss ? state.bossCounter : state.bossCounter + 1,
         })),
+      
 
       decreaseMilkedCount: (amount) =>
         set((state) => ({
@@ -100,6 +123,36 @@ export const useMilkStore = create<MilkState>()(
         return true;
       },
       toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
+
+// Boss-related actions
+increaseBossCounter: () =>
+  set((state) => ({ bossCounter: state.bossCounter + 1 })),
+
+activateBoss: (boss: BossDefinition) =>
+  set({
+    activeBoss: boss,
+    bossClicks: 0,
+    bossTimer: boss.time,
+  }),
+
+increaseBossClicks: (amount) =>
+  set((state) => ({
+    bossClicks: state.bossClicks + amount,
+  })),
+
+resetBoss: () =>
+  set(() => ({
+    activeBoss: null,
+    bossClicks: 0,
+    bossTimer: 0,
+  })),
+
+resetBossCounter: () => set({ bossCounter: 0 }), // Added this line
+
+spawnBoss: () => {
+  const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+  get().activateBoss(boss);
+},
     }),
     {
       name: "milk-storage",

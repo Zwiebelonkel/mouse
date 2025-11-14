@@ -10,7 +10,10 @@ import {
   Mouse,
   Cog,
   Home,
-  RefreshCcw
+  RefreshCcw,
+  CloudLightning,
+  MoonStar,
+  Flame,
 } from "lucide-react";
 
 export const upgrades = {

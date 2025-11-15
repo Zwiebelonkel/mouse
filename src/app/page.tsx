@@ -95,6 +95,7 @@ function useSoundPool(
     if (getPlaybackRate) audio.playbackRate = getPlaybackRate();
 
     if (exclusive) {
+      exclusiveChannel.stop(); // ✅ Stoppe vorherigen Sound BEVOR neuer startet
       exclusiveChannel.play(audio);
     } else {
       audio.play();
@@ -437,7 +438,7 @@ export default function Home() {
       }));
 
       fireMilkConfetti();
-      playSuccessSound();
+      playSuccessSound(); // ✅ Nur EINMAL hier
       
       // ✅ WICHTIG: Erst Result setzen, DANN Boss resetten
       setBossResult("win");
@@ -472,8 +473,7 @@ export default function Home() {
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
-      playStartSound();
-      playSuccessSound();
+      playStartSound(); // ✅ Nur Start-Sound, kein Success
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();

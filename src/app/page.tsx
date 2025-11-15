@@ -41,7 +41,7 @@ const exclusiveChannel = {
 
   play(audio: HTMLAudioElement) {
     this.current = audio;
-    audio.play();
+    audio.play().catch(() => {}); // ✅ Catch DOMException
   },
 };
 
@@ -196,6 +196,51 @@ export default function Home() {
   const playMouseSound = useSoundPool(mouseSound, undefined, false);
 
   // =============================================================
+  // MAUS WABER-ANIMATION (Idle nach 5 Sekunden)
+  // =============================================================
+  const [mouseRotation, setMouseRotation] = useState(0);
+  const [isMouseIdle, setIsMouseIdle] = useState(false);
+  const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const resetIdleTimer = () => {
+    setIsMouseIdle(false);
+    setMouseRotation(0);
+    
+    if (idleTimeoutRef.current) {
+      clearTimeout(idleTimeoutRef.current);
+    }
+    
+    idleTimeoutRef.current = setTimeout(() => {
+      setIsMouseIdle(true);
+    }, 5000);
+  };
+  
+  useEffect(() => {
+    resetIdleTimer();
+    
+    return () => {
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!isMouseIdle) {
+      setMouseRotation(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setMouseRotation(() => {
+        const time = Date.now() / 1000;
+        return Math.sin(time * 2) * 8;
+      });
+    }, 50);
+    
+    return () => clearInterval(interval);
+  }, [isMouseIdle]);
+  // =============================================================
   // STATE
   // =============================================================
   const [clicks, setClicks] = useState(0);
@@ -229,7 +274,8 @@ export default function Home() {
 
     setMultiplier((prev) => {
       if (prev >= maxMul) {
-        triggerShake();
+        // ✅ Kein Shake mehr bei max Combo
+        triggerShake()
         return maxMul;
       }
       if (prev < 1.1) return 1.1;
@@ -385,6 +431,8 @@ export default function Home() {
   // CLICK LOGIC
   // =============================================================
   const handleMouseClick = () => {
+    resetIdleTimer(); // ✅ Timer zurücksetzen bei Klick
+    
     if (activeBoss) {
       handleBossClick();
     } else if (clicks < clicksToMilk) {
@@ -413,6 +461,8 @@ export default function Home() {
   const handleBossClick = () => {
     if (!activeBoss) return;
 
+    resetIdleTimer(); // ✅ Timer zurücksetzen bei Boss-Klick
+    
     playBossClickSound();
     
     // Combo-Logik auch beim Boss
@@ -579,6 +629,10 @@ export default function Home() {
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
+  
+  // ✅ Check ob max Combo erreicht
+  const maxMul = 2 + (maxMultiplierBonus ?? 0);
+  const isMaxCombo = multiplier >= maxMul;
 
   const mouseGlow =
     multiplier >= 2
@@ -684,7 +738,11 @@ export default function Home() {
       </div>
 
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
-        <Card className="w-full max-w-sm text-center shadow-2xl relative z-[10]">
+        <Card 
+          className={`w-full max-w-sm text-center shadow-2xl relative z-[10] transition-all duration-300 ${
+            isMaxCombo ? "animate-pulse ring-4 ring-white shadow-[0_0_30px_rgba(255,255,255,0.8)]" : ""
+          }`}
+        >
           <CardHeader>
             <CardTitle className="text-accent flex items-center justify-center gap-2 text-4xl font-bold font-headline">
               <Rat className="h-8 w-8" /> Mouse Milker
@@ -722,10 +780,16 @@ export default function Home() {
                   className="cursor-pointer rounded-full p-4 transition-transform duration-150 ease-in-out active:scale-90"
                 >
                   <Rat
-                    className={`h-40 w-40 transition-transform duration-200 ${
+                    className={`h-40 w-40 transition-all duration-200 ${
                       isFlipped ? "scale-x-[-1]" : ""
                     } ${mouseGlow} ${activeBoss ? "animate-pulse" : ""}`}
-                    style={activeBoss ? { color: activeBoss.color, filter: `drop-shadow(0 0 15px ${activeBoss.color})` } : {}}
+                    style={{
+                      ...(activeBoss ? { 
+                        color: activeBoss.color, 
+                        filter: `drop-shadow(0 0 15px ${activeBoss.color})` 
+                      } : {}),
+                      transform: `rotate(${mouseRotation}deg) ${isFlipped ? 'scaleX(-1)' : 'scaleX(1)'}`,
+                    }}
                   />
                 </button>
 

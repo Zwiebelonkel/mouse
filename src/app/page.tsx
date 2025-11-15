@@ -737,16 +737,112 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="fixed bottom-4 right-4 z-[999] h-48 w-10 rounded-lg border-4 border-gray-400 bg-gray-200/50 backdrop-blur-sm flex flex-col justify-end overflow-hidden">
-        <div
-          className="bg-white transition-all duration-500 ease-in-out"
-          style={{ height: `${progress * 100}%` }}
-        ></div>
+      {/* Milch-Glas mit Wasserstand */}
+      <div className="fixed bottom-4 right-4 z-[999] w-24 h-56">
+        {/* Glas-Container */}
+        <div className="relative h-full w-full">
+          <svg
+            viewBox="0 0 100 200"
+            className="absolute inset-0 w-full h-full drop-shadow-lg"
+            style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}
+          >
+            {/* Clipping Path für Glas-Form */}
+            <defs>
+              <clipPath id="glassClip">
+                <path d="M 20 10 L 30 190 L 70 190 L 80 10 Z" />
+              </clipPath>
+              
+              {/* Wellen-Animation Pattern */}
+              <pattern id="waves" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse">
+                <path
+                  d="M 0 10 Q 12.5 5, 25 10 T 50 10 T 75 10 T 100 10 L 100 20 L 0 20 Z"
+                  fill="rgba(255,255,255,0.3)"
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    type="translate"
+                    from="0 0"
+                    to="50 0"
+                    dur="2s"
+                    repeatCount="indefinite"
+                  />
+                </path>
+              </pattern>
+            </defs>
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-black">
-            {isMounted ? formatNumber(milkedCount || 0) : "0"}
-          </span>
+            {/* Milch-Füllung mit Clip */}
+            <g clipPath="url(#glassClip)">
+              {/* Haupt-Milch */}
+              <rect
+                x="0"
+                y={200 - (progress * 180)}
+                width="100"
+                height={progress * 180}
+                fill="white"
+                className="transition-all duration-500 ease-out"
+              />
+              
+              {/* Wellen-Overlay */}
+              <rect
+                x="0"
+                y={200 - (progress * 180) - 5}
+                width="100"
+                height="10"
+                fill="url(#waves)"
+                opacity="0.6"
+                className="transition-all duration-500 ease-out"
+              />
+              
+              {/* Schaum-Effekt */}
+              <ellipse
+                cx="50"
+                cy={200 - (progress * 180)}
+                rx="30"
+                ry="4"
+                fill="white"
+                opacity="0.8"
+                className="transition-all duration-500 ease-out"
+              >
+                <animate
+                  attributeName="ry"
+                  values="4;5;4"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </ellipse>
+            </g>
+
+            {/* Glas-Körper (transparent, drüber) */}
+            <path
+              d="M 20 10 L 30 190 L 70 190 L 80 10 Z"
+              fill="rgba(255,255,255,0.05)"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="2"
+            />
+            
+            {/* Glas-Highlights */}
+            <path
+              d="M 25 15 L 32 180"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M 75 15 L 68 180"
+              stroke="rgba(255,255,255,0.2)"
+              strokeWidth="1.5"
+              fill="none"
+            />
+          </svg>
+
+          {/* Milch-Counter Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
+              <span className="text-sm font-bold text-white drop-shadow-lg">
+                {isMounted ? formatNumber(milkedCount || 0) : "0"}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -150,6 +150,9 @@ const warningSounds = [
 
 export default function Home() {
   const [bossTimer, setBossTimer] = useState(0);
+  const [bossResult, setBossResult] = useState<null | "win" | "lose">(null);
+  const [defeatedBossName, setDefeatedBossName] = useState<string>("");
+
   
   const {
     milkedCount,
@@ -411,29 +414,39 @@ export default function Home() {
 
     playBossClickSound();
     
-    // ✅ Combo-Logik auch beim Boss!
+    // Combo-Logik auch beim Boss
     if (comboTimeout) clearTimeout(comboTimeout);
     increaseMultiplier();
     const timeout = setTimeout(() => resetMultiplier(), comboTimeWindow);
     setComboTimeout(timeout);
 
-    // ✅ Erst den aktuellen Damage berechnen
+    // Erst den aktuellen Damage berechnen
     const damage = clicksPerMilk * multiplier;
     const newBossClicks = bossClicks + damage;
     
-    // ✅ Dann im Store updaten
+    // Dann im Store updaten
     increaseBossClicks(damage);
 
-    // ✅ DANN checken ob Boss tot ist (mit dem NEUEN Wert!)
+    // DANN checken ob Boss tot ist (mit dem NEUEN Wert!)
     if (newBossClicks >= activeBoss.hp) {
+      // Boss-Name speichern BEVOR wir resetten
+      setDefeatedBossName(activeBoss.name);
+      
       useMilkStore.setState(state => ({
         milkedCount: state.milkedCount + activeBoss.rewardMultiplier * 10
       }));
 
       fireMilkConfetti();
       playSuccessSound();
-      resetBoss();
-      document.documentElement.style.cursor = 'default';
+      
+      // ✅ WICHTIG: Erst Result setzen, DANN Boss resetten
+      setBossResult("win");
+      
+      // Boss reset verzögern damit der State sauber gesetzt wird
+      setTimeout(() => {
+        resetBoss();
+        document.documentElement.style.cursor = 'default';
+      }, 50);
     }
   };
 
@@ -451,15 +464,14 @@ export default function Home() {
   
       return () => clearInterval(interval);
     }
-  }, [autoClick, activeBoss, handleBossClick, handleMouseClick]);
+  }, [autoClick, activeBoss, bossClicks, clicks, multiplier]);
 
   // =============================================================
   // MILCH-ERFOLG (erhöht nur Counter) - NUR EINMAL!
   // =============================================================
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
-      increaseMilkedCount(); // ✅ Das erhöht bereits den bossCounter im Store!
-      // increaseBossCounter(); ❌ NICHT nochmal aufrufen!
+      increaseMilkedCount();
       playStartSound();
       playSuccessSound();
       setHasMilkedThisRound(true);
@@ -483,8 +495,15 @@ export default function Home() {
           setDisplayedBossTimer(nextTime);
           if (nextTime <= 0) {
             clearInterval(timerInterval!);
-            resetBoss();
-            document.documentElement.style.cursor = 'default';
+            
+            // ✅ WICHTIG: Erst Result setzen, DANN Boss resetten
+            setBossResult("lose");
+            
+            setTimeout(() => {
+              resetBoss();
+              document.documentElement.style.cursor = 'default';
+            }, 50);
+            
             return 0;
           }
           return nextTime;
@@ -500,7 +519,7 @@ export default function Home() {
         clearInterval(timerInterval);
       }
     };
-  }, [activeBoss, resetBoss]);
+  }, [activeBoss]);
   
   // =============================================================
   // CURSOR LOGIC
@@ -520,11 +539,9 @@ export default function Home() {
   // RESET → NEUE RUNDE (mit Boss-Check!)
   // =============================================================
   const handlePlayAgain = () => {
-    // ✅ HIER passiert der Boss-Check!
     const currentBossCounter = useMilkStore.getState().bossCounter;
     
     if (currentBossCounter >= 10) {
-      // Boss spawnen!
       const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
       activateBoss(randomBoss);
       playBossSound();
@@ -558,7 +575,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [activeBoss, handleBossClick, handleMouseClick]);
+  }, [activeBoss, bossClicks, clicks, multiplier]);
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
@@ -571,7 +588,67 @@ export default function Home() {
       : "";
 
   // =============================================================
-  // RENDER
+  // RENDER - BOSS RESULT SCREENS
+  // =============================================================
+  if (bossResult === "win") {
+    return (
+      <main className="flex h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-sm text-center p-6 shadow-2xl border-4 border-green-500">
+          <h2 className="text-4xl font-bold text-green-500 mb-4 animate-pulse">
+            🎉 Boss besiegt! 🎉
+          </h2>
+  
+          <p className="text-xl text-white mb-2">
+            {defeatedBossName || "Boss"}
+          </p>
+          
+          <p className="text-white mb-6">
+            Du hast den Boss erfolgreich gemolken und extra Milch erhalten!
+          </p>
+  
+          <Button
+            onClick={() => {
+              setBossResult(null);
+              setDefeatedBossName("");
+            }}
+            size="lg"
+            className="w-full"
+          >
+            Weiter spielen
+          </Button>
+        </Card>
+      </main>
+    );
+  }
+  
+  if (bossResult === "lose") {
+    return (
+      <main className="flex h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-sm text-center p-6 shadow-2xl border-4 border-red-500">
+          <h2 className="text-4xl font-bold text-red-500 mb-4 animate-pulse">
+            💀 Boss entkommen! 💀
+          </h2>
+  
+          <p className="text-white mb-6">
+            Du warst zu langsam – der Boss konnte entkommen. Versuche es beim nächsten Mal schneller!
+          </p>
+  
+          <Button
+            onClick={() => {
+              setBossResult(null);
+            }}
+            size="lg"
+            className="w-full"
+          >
+            Weiter spielen
+          </Button>
+        </Card>
+      </main>
+    );
+  }
+  
+  // =============================================================
+  // RENDER - MAIN GAME
   // =============================================================
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-background p-4 font-body overflow-hidden">

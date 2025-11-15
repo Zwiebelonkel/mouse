@@ -28,6 +28,7 @@ export default function StatsPage() {
     maxMultiplierBonus,
     baseMultiplierBonus,
     upgradeLevels,
+    resetGame,
   } = useMilkStore();
 
   const [code, setCode] = useState('');
@@ -64,6 +65,14 @@ export default function StatsPage() {
       setMessage('Falscher Code. Versuche es erneut.');
       setIsError(true);
       setCode('');
+    }
+  };
+
+  const handleResetGame = () => {
+    if (window.confirm('Bist du sicher, dass du deinen Spielstand zurücksetzen möchtest?')) {
+      resetGame();
+      setMessage('Spielstand erfolgreich zurückgesetzt!');
+      setIsError(false);
     }
   };
 
@@ -275,7 +284,19 @@ export default function StatsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Reset Button */}
+        <div className="mt-4">
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={handleResetGame}
+          >
+            Spielstand zurücksetzen
+          </Button>
+        </div>
       </div>
     </main>
   );
 }
+""

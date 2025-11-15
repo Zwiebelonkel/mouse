@@ -53,6 +53,8 @@ export interface MilkState {
   increaseBossClicks: (amount: number) => void;
   resetBoss: () => void;
   resetBossCounter: () => void; // Added this line
+
+  resetGame: () => void;
 }
 
 export const useMilkStore = create<MilkState>()(
@@ -154,10 +156,31 @@ spawnBoss: () => {
   const boss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
   get().activateBoss(boss);
 },
+resetGame: () => set({
+  milkedCount: 0,
+  totalMilkedCount: 0,
+  clicksPerMilk: 1,
+  autoClick: 0,
+  comboDecayReduction: 0,
+  maxMultiplierBonus: 0,
+  baseMultiplierBonus: 0,
+  passiveMilk: 0,
+  lastPassiveTick: Date.now(),
+  clicksToMilk: INITIAL_CLICKS_TO_MILK,
+  upgradeLevels: Object.fromEntries(
+    Object.keys(upgrades).map((k) => [k, 0])
+  ),
+  bossCounter: 0,
+  activeBoss: null,
+  bossClicks: 0,
+  bossTimer: 0,
+}),
     }),
+    
     {
       name: "milk-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
+""

@@ -258,6 +258,9 @@ export default function Home() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [hasMilkedThisRound, setHasMilkedThisRound] = useState(false);
   const [displayedBossTimer, setDisplayedBossTimer] = useState(0);
+  
+  // Glas-Animation State
+  const [glassAnimation, setGlassAnimation] = useState<'idle' | 'exit' | 'enter'>('idle');
 
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -533,7 +536,7 @@ export default function Home() {
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
-      playSuccessSound(); // ✅ Nur Start-Sound, kein Success
+      playSuccessSound(); // ✅ 
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();
@@ -601,23 +604,37 @@ export default function Home() {
   const handlePlayAgain = () => {
     const currentBossCounter = useMilkStore.getState().bossCounter;
     
-    if (currentBossCounter >= 10) {
-      const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
-      activateBoss(randomBoss);
-      playBossSound();
-      resetBossCounter();
-    }
-
-    playStartSound();
-    setClicks(0);
-    setHasMilkedThisRound(false);
-    increaseClicksToMilk();
-    resetMultiplier();
-    resetWarningTimeout();
+    // ✅ Glas-Animation starten
+    setGlassAnimation('exit');
     
-    if (!activeBoss) {
-      document.documentElement.style.cursor = 'default';
-    }
+    // Nach Exit-Animation → Werte resetten + Enter-Animation
+    setTimeout(() => {
+      if (currentBossCounter >= 10) {
+        const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
+        activateBoss(randomBoss);
+        playBossSound();
+        resetBossCounter();
+      }
+
+      playStartSound();
+      setClicks(0);
+      setHasMilkedThisRound(false);
+      increaseClicksToMilk();
+      resetMultiplier();
+      resetWarningTimeout();
+      
+      if (!activeBoss) {
+        document.documentElement.style.cursor = 'default';
+      }
+      
+      // Enter-Animation starten
+      setGlassAnimation('enter');
+      
+      // Nach Enter-Animation → zurück zu idle
+      setTimeout(() => {
+        setGlassAnimation('idle');
+      }, 600);
+    }, 600);
   };
 
   // =============================================================
@@ -738,9 +755,26 @@ export default function Home() {
       </div>
 
       {/* Milch-Glas mit Wasserstand */}
-      <div className="fixed bottom-4 right-4 z-[999] w-24 h-56">
+      <div 
+        className="fixed bottom-4 right-4 z-[999] w-24 h-56 transition-all duration-600 ease-in-out"
+        style={{
+          transform: 
+            glassAnimation === 'exit' 
+              ? 'translateX(200px) rotate(20deg)' 
+              : glassAnimation === 'enter'
+              ? 'translateY(0px) rotate(0deg)'
+              : 'translateY(0px) rotate(0deg)',
+          opacity: glassAnimation === 'exit' ? 0 : 1,
+        }}
+      >
         {/* Glas-Container */}
-        <div className="relative h-full w-full">
+        <div 
+          className="relative h-full w-full"
+          style={{
+            transform: glassAnimation === 'enter' ? 'translateY(0)' : 'translateY(0)',
+            animation: glassAnimation === 'enter' ? 'slideUpGlass 0.6s ease-out' : 'none'
+          }}
+        >
           <svg
             viewBox="0 0 100 200"
             className="absolute inset-0 w-full h-full drop-shadow-lg"
@@ -845,6 +879,20 @@ export default function Home() {
           </div>
         </div>
       </div>
+      
+      {/* CSS Animationen für Glas */}
+      <style jsx>{`
+        @keyframes slideUpGlass {
+          from {
+            transform: translateY(300px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
 
       <div className={`game-area ${isShaking ? "screenshake" : ""}`}>
         <Card 

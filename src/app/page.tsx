@@ -463,7 +463,7 @@ export default function Home() {
 
     resetIdleTimer(); // ✅ Timer zurücksetzen bei Boss-Klick
     
-    playBossClickSound();
+    playClickSound();
     
     // Combo-Logik auch beim Boss
     if (comboTimeout) clearTimeout(comboTimeout);
@@ -523,7 +523,7 @@ export default function Home() {
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
-      playStartSound(); // ✅ Nur Start-Sound, kein Success
+      playSucessSound(); // ✅ Nur Start-Sound, kein Success
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();
@@ -594,7 +594,7 @@ export default function Home() {
     if (currentBossCounter >= 10) {
       const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
       activateBoss(randomBoss);
-      playBossSound();
+      play();
       resetBossCounter();
     }
 

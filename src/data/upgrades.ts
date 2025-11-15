@@ -52,7 +52,7 @@ export const upgrades = {
   },
 
   milkMaschine: {
-    name: "Milchmschine",
+    name: "Milchmaschine",
     description: "+ 0.75 Click / Minute",
     baseCost: 1,
     maxLevel: 100,
@@ -67,7 +67,7 @@ export const upgrades = {
     name: "Combo Master",
     description: "Combo decay -20%",
     baseCost: 15,
-    maxLevel: 10,
+    maxLevel: 16,
     icon: Gauge,
     effect: (state) => ({
       comboDecayReduction: state.comboDecayReduction + 0.2,

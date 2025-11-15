@@ -47,6 +47,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "dotenv": "^16.5.0",
+    "electron-is-dev": "^3.0.1",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^11.9.1",
     "genkit": "^1.20.0",
@@ -76,8 +77,8 @@
     "typescript": "^5"
   },
   "build": {
-    "appId": "com.example.nextron",
-    "productName": "Nextron",
+    "appId": "com.example.milker",
+    "productName": "Mouse Milker",
     "files": [
       "docs/**/*",
       "main.js"
@@ -86,7 +87,9 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "icons/favicon.ico",
+      "sign": false
     },
     "linux": {
       "target": "AppImage"

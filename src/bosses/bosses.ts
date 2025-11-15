@@ -20,7 +20,7 @@ export interface BossDefinition {
       time: 8,
       rewardMultiplier: 3,
       icon: "zap",
-      sound: "/mouse/sounds/boss_thunder.mp3"
+      sound: "/mouse/sounds/bossStart.mp3"
     },
     {
       id: "shadow",
@@ -30,7 +30,7 @@ export interface BossDefinition {
       time: 10,
       rewardMultiplier: 5,
       icon: "moon",
-      sound: "/mouse/sounds/boss_shadow.mp3"
+      sound: "/mouse/sounds/bossStart.mp3"
     },
     {
       id: "lava",
@@ -40,7 +40,7 @@ export interface BossDefinition {
       time: 12,
       rewardMultiplier: 7,
       icon: "flame",
-      sound: "/mouse/sounds/boss_lava.mp3"
+      sound: "/mouse/sounds/bossStart.mp3"
     }
   ];
   

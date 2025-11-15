@@ -17,6 +17,16 @@ import AudioToggle from "@/components/AudioToggle";
 import { BOSSES } from "@/bosses/bosses";
 
 // =============================================================
+// ZAHL FORMATTER
+// =============================================================
+function formatNumber(num: number): string {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1) + "B";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+  return Math.floor(num).toString();
+}
+
+// =============================================================
 // iPHONE AUDIO UNLOCK
 // =============================================================
 function unlockIOSAudio() {
@@ -523,7 +533,7 @@ export default function Home() {
   useEffect(() => {
     if (!activeBoss && clicks >= clicksToMilk && clicks > 0 && !hasMilkedThisRound) {
       increaseMilkedCount();
-      playSucessSound(); // ✅ Nur Start-Sound, kein Success
+      playSuccessSound(); // ✅ Nur Start-Sound, kein Success
       setHasMilkedThisRound(true);
       fireMilkConfetti();
       triggerShake();
@@ -594,7 +604,7 @@ export default function Home() {
     if (currentBossCounter >= 10) {
       const randomBoss = BOSSES[Math.floor(Math.random() * BOSSES.length)];
       activateBoss(randomBoss);
-      play();
+      playBossSound();
       resetBossCounter();
     }
 
@@ -615,6 +625,9 @@ export default function Home() {
   // =============================================================
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // ✅ Nicht klicken wenn Boss Result Screen offen ist
+      if (bossResult !== null) return;
+      
       if (e.code === "Space") {
         if (activeBoss) {
           handleBossClick();
@@ -625,7 +638,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [activeBoss, bossClicks, clicks, multiplier]);
+  }, [activeBoss, bossClicks, clicks, multiplier, bossResult]);
 
   const milked = clicks >= clicksToMilk;
   const progress = isMounted ? Math.min(clicks / clicksToMilk, 1) : 0;
@@ -732,7 +745,7 @@ export default function Home() {
 
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-xs font-bold text-black">
-            {isMounted ? (milkedCount || 0).toFixed(0) : "0"}
+            {isMounted ? formatNumber(milkedCount || 0) : "0"}
           </span>
         </div>
       </div>
@@ -808,7 +821,7 @@ export default function Home() {
                       ></div>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {Math.floor(bossClicks)} / {activeBoss.hp} HP
+                      {formatNumber(bossClicks)} / {formatNumber(activeBoss.hp)} HP
                     </p>
                     <p className="text-lg font-bold text-red-500">
                       ⏳ {displayedBossTimer.toFixed(1)}s
@@ -830,15 +843,12 @@ export default function Home() {
                 {!activeBoss && (
                   <div className="text-center">
                     <p className="text-5xl font-bold text-foreground">
-                      {Math.floor(clicks)}
+                      {formatNumber(clicks)}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {clicks === 0
                         ? `Click the mouse ${clicksToMilk} times!`
-                        : `${Math.max(
-                            0,
-                            Math.round(clicksToMilk - clicks)
-                          )} more clicks to go!`}
+                        : `${formatNumber(Math.max(0, clicksToMilk - clicks))} more clicks to go!`}
                     </p>
                   </div>
                 )}

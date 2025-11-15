@@ -13,6 +13,16 @@ import {
 } from '@/components/ui/card';
 import { ArrowLeft, BarChart3, KeyRound, Milk } from 'lucide-react';
 
+// =============================================================
+// ZAHL FORMATTER
+// =============================================================
+function formatNumber(num: number): string {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1) + "B";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+  return Math.floor(num).toString();
+}
+
 const SECRET_CODE = '1906';
 const SECRET_REWARD = 1_000_000;
 
@@ -58,7 +68,7 @@ export default function StatsPage() {
         milkedCount: state.milkedCount + SECRET_REWARD,
         totalMilkedCount: state.totalMilkedCount + SECRET_REWARD,
       }));
-      setMessage(`Geheimer Bonus aktiviert! +${SECRET_REWARD.toLocaleString('de-DE')} Milch 🥛`);
+      setMessage(`Geheimer Bonus aktiviert! +${formatNumber(SECRET_REWARD)} Milch 🥛`);
       setIsError(false);
       setCode('');
     } else {
@@ -114,7 +124,7 @@ export default function StatsPage() {
                   Aktuelle Milch
                 </span>
                 <span className="font-semibold text-accent">
-                  {milkedCount.toFixed(0)}
+                  {formatNumber(milkedCount)}
                 </span>
               </div>
 
@@ -123,7 +133,7 @@ export default function StatsPage() {
                   Insgesamt gemolkene Mäuse
                 </span>
                 <span className="font-semibold text-accent">
-                  {totalMilkedCount.toFixed(0)}
+                  {formatNumber(totalMilkedCount)}
                 </span>
               </div>
 
@@ -163,7 +173,7 @@ export default function StatsPage() {
                   Klicks zum nächsten Melken
                 </span>
                 <span className="font-semibold text-accent">
-                  {clicksToMilk.toFixed(0)}
+                  {formatNumber(clicksToMilk)}
                 </span>
               </div>
 
@@ -299,4 +309,3 @@ export default function StatsPage() {
     </main>
   );
 }
-""

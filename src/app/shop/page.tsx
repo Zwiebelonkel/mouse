@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button";
 import { useMilkStore } from "@/store/milk";
 import { Milk } from "lucide-react";
 
+// =============================================================
+// ZAHL FORMATTER
+// =============================================================
+function formatNumber(num: number): string {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1) + "B";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+  return Math.floor(num).toString();
+}
+
 export default function ShopPage() {
   const { milkedCount } = useMilkStore();
 
@@ -15,7 +25,7 @@ export default function ShopPage() {
       <div className="fixed bottom-6 right-6 z-10 flex items-center gap-4">
         <div className="flex items-center gap-2 rounded-xl bg-secondary p-3 font-bold shadow-inner text-lg">
           <Milk className="h-6 w-6" />
-          <span>{milkedCount}</span>
+          <span>{formatNumber(milkedCount)}</span>
         </div>
         <Link href="/">
           <Button>Zurück</Button>

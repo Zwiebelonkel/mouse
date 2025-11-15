@@ -5,6 +5,16 @@ import { useMilkStore } from "@/store/milk";
 import { upgrades } from "@/data/upgrades";
 import { useState } from "react";
 
+// =============================================================
+// ZAHL FORMATTER
+// =============================================================
+function formatNumber(num: number): string {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1) + "B";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+  return Math.floor(num).toString();
+}
+
 interface UpgradeCardProps {
   id: string;
 }
@@ -48,7 +58,7 @@ export default function UpgradeCard({ id }: UpgradeCardProps) {
 
       <div className="mt-4">
         <p className="text-sm mb-2">
-          Kosten: <strong>{cost} 🥛</strong>
+          Kosten: <strong>{formatNumber(cost)} 🥛</strong>
         </p>
 
         <Button
@@ -65,7 +75,7 @@ export default function UpgradeCard({ id }: UpgradeCardProps) {
 
         {!canBuy && level < upg.maxLevel && (
           <p className="text-xs text-center text-destructive mt-1">
-            Dir fehlen {cost - milkedCount} 🥛
+            Dir fehlen {formatNumber(cost - milkedCount)} 🥛
           </p>
         )}
 

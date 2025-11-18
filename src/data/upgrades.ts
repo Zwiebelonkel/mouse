@@ -67,7 +67,7 @@ export const upgrades = {
     name: "Combo Master",
     description: "Combo decay -20%",
     baseCost: 15,
-    maxLevel: 16,
+    maxLevel: 10,
     icon: Gauge,
     effect: (state) => ({
       comboDecayReduction: state.comboDecayReduction + 0.2,
@@ -78,7 +78,7 @@ export const upgrades = {
     name: "Ultra Combo",
     description: "Max Multiplikator +0.5",
     baseCost: 18,
-    maxLevel: 10,
+    maxLevel: 16,
     icon: GaugeCircle,
     effect: (state) => ({
       maxMultiplierBonus: state.maxMultiplierBonus + 0.5,

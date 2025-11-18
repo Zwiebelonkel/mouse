@@ -9,7 +9,7 @@
     "dev": "next dev --turbopack -p 9003",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
+    "build": "next build && cp public/sw.js docs/sw.js && cp public/apple-touch-icon.png docs/apple-touch-icon.png",
     "start": "npx serve@latest docs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

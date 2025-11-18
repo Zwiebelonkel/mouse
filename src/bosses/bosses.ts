@@ -41,6 +41,36 @@ export interface BossDefinition {
       rewardMultiplier: 7,
       icon: "flame",
       sound: "/mouse/sounds/bossStart.mp3"
+    },
+    {
+      id: "frost",
+      name: "Frost-Maus",
+      color: "#00bfff",
+      hp: 350,
+      time: 15,
+      rewardMultiplier: 10,
+      icon: "snowflake",
+      sound: "/mouse/sounds/bossStart.mp3"
+    },
+    {
+      id: "steel",
+      name: "Stahl-Maus",
+      color: "#a9a9a9",
+      hp: 500,
+      time: 20,
+      rewardMultiplier: 15,
+      icon: "shield",
+      sound: "/mouse/sounds/bossStart.mp3"
+    },
+    {
+      id: "dimensional",
+      name: "Dimensions-Maus",
+      color: "#f0f",
+      hp: 1000,
+      time: 30,
+      rewardMultiplier: 30,
+      icon: "aperture",
+      sound: "/mouse/sounds/bossStart.mp3"
     }
   ];
   

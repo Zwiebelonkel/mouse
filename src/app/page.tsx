@@ -9,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Rat, ShoppingCart, RefreshCcw, Milk, BarChart3 } from "lucide-react";
-import Link from "next/link";
+import { Rat, ShoppingCart, RefreshCcw, Milk, BarChart3, Zap, Moon, Flame, Snowflake, Shield, Aperture } from "lucide-react";import Link from "next/link";
 import { useMilkStore } from "@/store/milk";
 import confetti from "canvas-confetti/dist/confetti.module.mjs";
 import AudioToggle from "@/components/AudioToggle";

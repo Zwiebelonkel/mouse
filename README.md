@@ -26,7 +26,7 @@ Deine Mission, solltest du sie annehmen, ist einfach: Klicke auf die Maus, um Mi
 
 1.  **Repository klonen:**
     ```bash
-    git clone https://github.com/your-username/mouse-milker.git
+    git clone https://github.com/zwiebelonkel/mouse-milker.git
     ```
 2.  **Abhängigkeiten installieren:**
     ```bash
